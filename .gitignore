@@ -2,3 +2,5 @@ target
 *.iws
 *.iml
 *.ipr
+lib_managed
+project/boot

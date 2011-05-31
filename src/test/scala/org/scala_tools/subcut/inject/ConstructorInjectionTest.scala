@@ -2,9 +2,9 @@ package org.scala_tools.subcut.inject
 
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.{SeveredStackTraces, FunSuite}
-import org.scala_tools.subcut.inject.Injected._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
+import org.scala_tools.subcut.inject.injected
 
 /**
  * Created by IntelliJ IDEA.

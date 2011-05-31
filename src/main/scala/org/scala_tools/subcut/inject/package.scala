@@ -1,4 +1,4 @@
-package org.scala_tools.subcut.inject
+package org.scala_tools.subcut
 
 /**
  * Created by IntelliJ IDEA.

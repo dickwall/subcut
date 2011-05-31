@@ -51,7 +51,7 @@ trait BindingModule { outer =>
    * to just providing an implementation based only on the class.
    * @param clazz the class to match for the binding match
    * @param name an optional name to use for the binding match
-   * @returns the instance the binding was configured to return
+   * @return the instance the binding was configured to return
    */
   def inject[T <: Any](clazz: Class[T], name: Option[String]): T = {
     val key = BindingKey(clazz.asInstanceOf[Class[Any]], name)

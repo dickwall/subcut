@@ -16,13 +16,13 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class ConstructorInjectionTest extends FunSuite with ShouldMatchers with SeveredStackTraces {
   test("Use defined binding, supply no constructor parameter") {
-	  implicit val bindings = AnimalModule
+    implicit val bindings = AnimalModule
     val ad = new AnimalDomain
     ad.soundsFromDomain should be ("Woof Woof Woof ")
   }
 
   test("Use supplied animal in constructor parameter") {
-		implicit val bindings = AnimalModule
+    implicit val bindings = AnimalModule
     val ad = new AnimalDomain(new Frog)
     ad.soundsFromDomain should be ("Ribbit Ribbit Ribbit ")
   }

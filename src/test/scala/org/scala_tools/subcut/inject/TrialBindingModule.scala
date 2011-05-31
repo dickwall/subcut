@@ -52,7 +52,7 @@ class InjectionTest extends FunSuite with ShouldMatchers with SeveredStackTraces
       lazy val impl2 = inject[TestTrait]('fixed)
     }
 
-		implicit val bindings = TrialBindingModule
+    implicit val bindings = TrialBindingModule
     val injected1 = new SomeInjectedWithFixed
     val injected2 = new SomeInjectedWithFixed
 

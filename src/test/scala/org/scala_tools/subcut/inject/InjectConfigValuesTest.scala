@@ -15,7 +15,7 @@ import org.junit.runner.RunWith
 @RunWith(classOf[JUnitRunner])
 class InjectConfigValuesTest extends FunSuite with ShouldMatchers with SeveredStackTraces {
   test("inject some default configuration values using all bound") {
-		implicit val bindings = ConfigValueModule
+    implicit val bindings = ConfigValueModule
     val config1 = new ConfigValueInstance
     config1.poolSize should be (20)
     config1.minPoolSize should be (10)
@@ -29,7 +29,7 @@ class InjectConfigValuesTest extends FunSuite with ShouldMatchers with SeveredSt
       configValueModule.unbind[Int]('poolSize)
       configValueModule.bind [Int] identifiedBy 'minPoolSize toInstance (5)
 
-			implicit val bindings = configValueModule
+      implicit val bindings = configValueModule
 
       val config1 = new ConfigValueInstance
       config1.poolSize should be (30)

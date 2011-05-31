@@ -1,0 +1,131 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>~/dev/Scala/subcut/src/test/scala/org/scala_tools/subcut/inject/ModuleCompositionAndMergingTest.scala.html</title>
+<meta name="Generator" content="Vim/7.2">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+</head>
+<body bgcolor="#002b36" text="#93a1a1"><font face="monospace">
+<font color="#cb4b16">package</font>&nbsp;org.scala_tools.subcut.inject<br>
+<br>
+<font color="#cb4b16">import</font>&nbsp;org.scalatest.matchers.ShouldMatchers<br>
+<font color="#cb4b16">import</font>&nbsp;org.scalatest.{FunSuite, SeveredStackTraces}<br>
+<font color="#cb4b16">import</font>&nbsp;org.scalatest.junit.JUnitRunner<br>
+<font color="#cb4b16">import</font>&nbsp;org.junit.runner.RunWith<br>
+<br>
+<font color="#657b83"><i>/**</i></font><br>
+<font color="#657b83"><i>&nbsp;* Created by IntelliJ IDEA.</i></font><br>
+<font color="#657b83"><i>&nbsp;* User: Dick Wall</i></font><br>
+<font color="#657b83"><i>&nbsp;* Date: 5/1/11</i></font><br>
+<font color="#657b83"><i>&nbsp;* Time: 4:46 PM</i></font><br>
+<font color="#657b83"><i>&nbsp;*/</i></font><br>
+<br>
+@<font color="#dc322f">RunWith</font>(classOf[<font color="#dc322f">JUnitRunner</font>])<br>
+<font color="#719e07">class</font>&nbsp;<font color="#dc322f">ModuleCompositionAndMergingTest</font>&nbsp;<font color="#719e07">extends</font>&nbsp;<font color="#dc322f">FunSuite</font>&nbsp;<font color="#719e07">with</font>&nbsp;<font color="#dc322f">ShouldMatchers</font>&nbsp;<font color="#719e07">with</font>&nbsp;<font color="#dc322f">SeveredStackTraces</font>&nbsp;{<br>
+<br>
+&nbsp;&nbsp;test(<font color="#2aa198">&quot;Modules should be composable the :: operator&quot;</font>) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<font color="#719e07">implicit</font>&nbsp;<font color="#719e07">def</font>&nbsp;<font color="#268bd2">billsBindings</font>&nbsp;= <font color="#dc322f">MediumGardenModule</font>&nbsp;<span style="background-color: #002b36"><font color="#93a1a1">::</font></span>&nbsp;<font color="#dc322f">LawnModule</font>&nbsp;<span style="background-color: #002b36"><font color="#93a1a1">::</font></span>&nbsp;<font color="#dc322f">LarchModule</font><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<font color="#719e07">val</font>&nbsp;billsGarden&nbsp;= <font color="#719e07">new</font>&nbsp;<font color="#dc322f">Garden</font>&nbsp;&nbsp;&nbsp;&nbsp;<font color="#657b83"><i>// will pick up the configuration module implicitly</i></font><br>
+&nbsp;&nbsp;&nbsp;&nbsp;billsGarden.describeGarden&nbsp;should be (<font color="#2aa198">&quot;The garden is 200 sq ft, has a Larch tree 120 high, Grass ground covering that cost 50 initially and 25 maintenance&quot;</font>)<br>
+&nbsp;&nbsp;}<br>
+<br>
+&nbsp;&nbsp;test(<font color="#2aa198">&quot;Modules using the :: operator should have left to right priority&quot;</font>) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<font color="#719e07">implicit</font>&nbsp;<font color="#719e07">def</font>&nbsp;<font color="#268bd2">sallysBindings</font>&nbsp;= <font color="#dc322f">SmallGardenModule</font>&nbsp;<span style="background-color: #002b36"><font color="#93a1a1">::</font></span>&nbsp;<font color="#dc322f">MediumGardenModule</font>&nbsp;<span style="background-color: #002b36"><font color="#93a1a1">::</font></span>&nbsp;<font color="#dc322f">OakModule</font>&nbsp;<span style="background-color: #002b36"><font color="#93a1a1">::</font></span>&nbsp;<font color="#dc322f">LawnModule</font>&nbsp;<span style="background-color: #002b36"><font color="#93a1a1">::</font></span>&nbsp;<font color="#dc322f">LarchModule</font><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<font color="#719e07">val</font>&nbsp;sallysGarden&nbsp;= <font color="#719e07">new</font>&nbsp;<font color="#dc322f">Garden</font>&nbsp;&nbsp;&nbsp;&nbsp;<font color="#657b83"><i>// will pick up the configuration module implicitly</i></font><br>
+&nbsp;&nbsp;&nbsp;&nbsp;sallysGarden.describeGarden&nbsp;should be (<font color="#2aa198">&quot;The garden is 50 sq ft, has a Oak tree 150 high, Grass ground covering that cost 50 initially and 25 maintenance&quot;</font>)<br>
+&nbsp;&nbsp;}<br>
+<br>
+&nbsp;&nbsp;test(<font color="#2aa198">&quot;Should not be able to cast a binding module to Mutable&quot;</font>) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;intercept[<font color="#dc322f">ClassCastException</font>] {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#719e07">val</font>&nbsp;mutable&nbsp;= SmallGardenModule.asInstanceOf[<font color="#dc322f">MutableBindingModule</font>]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;}<br>
+}<br>
+<br>
+<font color="#657b83"><i>// let's make some modules to bind in</i></font><br>
+<br>
+<font color="#719e07">object</font>&nbsp;<font color="#dc322f">LarchModule</font>&nbsp;<font color="#719e07">extends</font>&nbsp;<font color="#dc322f">NewBindingModule</font>({ module <font color="#719e07">=&gt;</font><br>
+&nbsp;&nbsp;module.bind&nbsp;[<font color="#dc322f">Tree</font>] toInstance { <font color="#719e07">new</font>&nbsp;<font color="#dc322f">Larch</font>&nbsp;}<br>
+})<br>
+<br>
+<font color="#719e07">object</font>&nbsp;<font color="#dc322f">OakModule</font>&nbsp;<font color="#719e07">extends</font>&nbsp;<font color="#dc322f">NewBindingModule</font>({ module <font color="#719e07">=&gt;</font><br>
+&nbsp;&nbsp;module.bind&nbsp;[<font color="#dc322f">Tree</font>] toInstance { <font color="#719e07">new</font>&nbsp;<font color="#dc322f">Oak</font>&nbsp;}<br>
+})<br>
+<br>
+<font color="#719e07">object</font>&nbsp;<font color="#dc322f">LawnModule</font>&nbsp;<font color="#719e07">extends</font>&nbsp;<font color="#dc322f">NewBindingModule</font>({ module <font color="#719e07">=&gt;</font><br>
+&nbsp;&nbsp;module.bind&nbsp;[<font color="#dc322f">GroundCover</font>] toInstance { <font color="#719e07">new</font>&nbsp;<font color="#dc322f">Lawn</font>&nbsp;}<br>
+})<br>
+<br>
+<font color="#719e07">object</font>&nbsp;<font color="#dc322f">PavedModule</font>&nbsp;<font color="#719e07">extends</font>&nbsp;<font color="#dc322f">NewBindingModule</font>({ module <font color="#719e07">=&gt;</font><br>
+&nbsp;&nbsp;module.bind&nbsp;[<font color="#dc322f">GroundCover</font>] toInstance { <font color="#719e07">new</font>&nbsp;<font color="#dc322f">Paved</font>&nbsp;}<br>
+})<br>
+<br>
+<font color="#719e07">object</font>&nbsp;<font color="#dc322f">SmallGardenModule</font>&nbsp;<font color="#719e07">extends</font>&nbsp;<font color="#dc322f">NewBindingModule</font>({ module <font color="#719e07">=&gt;</font><br>
+&nbsp;&nbsp;module.bind&nbsp;[<font color="#dc322f">GardenPlot</font>] toInstance { <font color="#719e07">new</font>&nbsp;<font color="#dc322f">SmallGardenPlot</font>&nbsp;}<br>
+})<br>
+<br>
+<font color="#719e07">object</font>&nbsp;<font color="#dc322f">MediumGardenModule</font>&nbsp;<font color="#719e07">extends</font>&nbsp;<font color="#dc322f">NewBindingModule</font>({ module <font color="#719e07">=&gt;</font><br>
+&nbsp;&nbsp;module.bind&nbsp;[<font color="#dc322f">GardenPlot</font>] toInstance { <font color="#719e07">new</font>&nbsp;<font color="#dc322f">MediumGardenPlot</font>&nbsp;}<br>
+})<br>
+<br>
+<font color="#719e07">class</font>&nbsp;<font color="#dc322f">Garden</font>(<font color="#719e07">implicit</font>&nbsp;<font color="#719e07">val</font>&nbsp;bindingModule:<font color="#b58900">&nbsp;BindingModule</font>) <font color="#719e07">extends</font>&nbsp;<font color="#dc322f">Injectable</font>&nbsp;{<br>
+&nbsp;&nbsp;<font color="#719e07">val</font>&nbsp;plot&nbsp;= inject[<font color="#dc322f">GardenPlot</font>]<br>
+&nbsp;&nbsp;<font color="#719e07">val</font>&nbsp;tree&nbsp;= inject[<font color="#dc322f">Tree</font>]<br>
+&nbsp;&nbsp;<font color="#719e07">val</font>&nbsp;cover&nbsp;= inject[<font color="#dc322f">GroundCover</font>]<br>
+<br>
+&nbsp;&nbsp;<font color="#719e07">def</font>&nbsp;<font color="#268bd2">describeGarden</font>:<font color="#b58900">&nbsp;String</font>&nbsp;=<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<font color="#2aa198">&quot;The garden is %d sq ft, has a %s tree %d high, %s ground covering that cost %d initially and %d maintenance&quot;</font>.format(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;plot.area, tree.species, tree.height, cover.coverType, cover.initialCost, cover.maintenanceCost<br>
+&nbsp;&nbsp;&nbsp;&nbsp;)<br>
+}<br>
+<br>
+<font color="#719e07">trait</font>&nbsp;<font color="#dc322f">Tree</font>&nbsp;{<br>
+&nbsp;&nbsp;<font color="#719e07">def</font>&nbsp;<font color="#268bd2">species</font>:<font color="#b58900">&nbsp;String</font><br>
+&nbsp;&nbsp;<font color="#719e07">def</font>&nbsp;<font color="#268bd2">height</font>:<font color="#b58900">&nbsp;Int</font><br>
+}<br>
+<br>
+<font color="#719e07">class</font>&nbsp;<font color="#dc322f">Oak</font>&nbsp;<font color="#719e07">extends</font>&nbsp;<font color="#dc322f">Tree</font>&nbsp;{<br>
+&nbsp;&nbsp;<font color="#719e07">def</font>&nbsp;<font color="#268bd2">species</font>&nbsp;= <font color="#2aa198">&quot;Oak&quot;</font><br>
+&nbsp;&nbsp;<font color="#719e07">def</font>&nbsp;<font color="#268bd2">height</font>&nbsp;= <font color="#2aa198">150</font><br>
+}<br>
+<br>
+<font color="#719e07">class</font>&nbsp;<font color="#dc322f">Larch</font>&nbsp;<font color="#719e07">extends</font>&nbsp;<font color="#dc322f">Tree</font>&nbsp;{<br>
+&nbsp;&nbsp;<font color="#719e07">def</font>&nbsp;<font color="#268bd2">species</font>&nbsp;= <font color="#2aa198">&quot;Larch&quot;</font><br>
+&nbsp;&nbsp;<font color="#719e07">def</font>&nbsp;<font color="#268bd2">height</font>&nbsp;= <font color="#2aa198">120</font><br>
+}<br>
+<br>
+<font color="#719e07">trait</font>&nbsp;<font color="#dc322f">GroundCover</font>&nbsp;{<br>
+&nbsp;&nbsp;<font color="#719e07">def</font>&nbsp;<font color="#268bd2">coverType</font>:<font color="#b58900">&nbsp;String</font><br>
+&nbsp;&nbsp;<font color="#719e07">def</font>&nbsp;<font color="#268bd2">initialCost</font>:<font color="#b58900">&nbsp;Int</font><br>
+&nbsp;&nbsp;<font color="#719e07">def</font>&nbsp;<font color="#268bd2">maintenanceCost</font>:<font color="#b58900">&nbsp;Int</font><br>
+}<br>
+<br>
+<font color="#719e07">class</font>&nbsp;<font color="#dc322f">Lawn</font>&nbsp;<font color="#719e07">extends</font>&nbsp;<font color="#dc322f">GroundCover</font>&nbsp;{<br>
+&nbsp;&nbsp;<font color="#719e07">def</font>&nbsp;<font color="#268bd2">coverType</font>&nbsp;= <font color="#2aa198">&quot;Grass&quot;</font><br>
+&nbsp;&nbsp;<font color="#719e07">def</font>&nbsp;<font color="#268bd2">initialCost</font>&nbsp;= <font color="#2aa198">50</font><br>
+&nbsp;&nbsp;<font color="#719e07">def</font>&nbsp;<font color="#268bd2">maintenanceCost</font>&nbsp;= <font color="#2aa198">25</font><br>
+}<br>
+<br>
+<font color="#719e07">class</font>&nbsp;<font color="#dc322f">Paved</font>&nbsp;<font color="#719e07">extends</font>&nbsp;<font color="#dc322f">GroundCover</font>&nbsp;{<br>
+&nbsp;&nbsp;<font color="#719e07">def</font>&nbsp;<font color="#268bd2">coverType</font>&nbsp;= <font color="#2aa198">&quot;Stone&quot;</font><br>
+&nbsp;&nbsp;<font color="#719e07">def</font>&nbsp;<font color="#268bd2">initialCost</font>&nbsp;= <font color="#2aa198">100</font><br>
+&nbsp;&nbsp;<font color="#719e07">def</font>&nbsp;<font color="#268bd2">maintenanceCost</font>&nbsp;= <font color="#2aa198">0</font><br>
+}<br>
+<br>
+<font color="#719e07">trait</font>&nbsp;<font color="#dc322f">GardenPlot</font>&nbsp;{<br>
+&nbsp;&nbsp;<font color="#719e07">def</font>&nbsp;<font color="#268bd2">x</font>:<font color="#b58900">&nbsp;Int</font><br>
+&nbsp;&nbsp;<font color="#719e07">def</font>&nbsp;<font color="#268bd2">y</font>:<font color="#b58900">&nbsp;Int</font><br>
+&nbsp;&nbsp;<font color="#719e07">def</font>&nbsp;<font color="#268bd2">area</font>&nbsp;= x * y<br>
+}<br>
+<br>
+<font color="#719e07">class</font>&nbsp;<font color="#dc322f">SmallGardenPlot</font>&nbsp;<font color="#719e07">extends</font>&nbsp;<font color="#dc322f">GardenPlot</font>&nbsp;{<br>
+&nbsp;&nbsp;<font color="#719e07">def</font>&nbsp;<font color="#268bd2">x</font>&nbsp;= <font color="#2aa198">5</font><br>
+&nbsp;&nbsp;<font color="#719e07">def</font>&nbsp;<font color="#268bd2">y</font>&nbsp;= <font color="#2aa198">10</font><br>
+}<br>
+<br>
+<font color="#719e07">class</font>&nbsp;<font color="#dc322f">MediumGardenPlot</font>&nbsp;<font color="#719e07">extends</font>&nbsp;<font color="#dc322f">GardenPlot</font>&nbsp;{<br>
+&nbsp;&nbsp;<font color="#719e07">def</font>&nbsp;<font color="#268bd2">x</font>&nbsp;= <font color="#2aa198">10</font><br>
+&nbsp;&nbsp;<font color="#719e07">def</font>&nbsp;<font color="#268bd2">y</font>&nbsp;= <font color="#2aa198">20</font><br>
+}<br>
+</font></body>
+</html>

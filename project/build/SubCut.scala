@@ -74,11 +74,6 @@ class SubCut(info : ProjectInfo) extends DefaultProject(info) with IdeaProject {
       </developer>
     </developers>
 
-    <ciManagement>
-      <system>hudson</system>
-      <url>http://hudson.scala-tools.org/job/subcut/</url>
-    </ciManagement>
-
     <issueManagement>
       <system>GitHub</system>
       <url>http://github.com/dickwall/subcut/issues</url>

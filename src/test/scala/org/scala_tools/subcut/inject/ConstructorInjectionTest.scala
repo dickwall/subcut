@@ -5,6 +5,7 @@ import org.scalatest.{SeveredStackTraces, FunSuite}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scala_tools.subcut.inject.injected
+import scala.Some
 
 /**
  * Created by IntelliJ IDEA.
@@ -23,7 +24,7 @@ class ConstructorInjectionTest extends FunSuite with ShouldMatchers with Severed
 
   test("Use supplied animal in constructor parameter") {
     implicit val bindings = AnimalModule
-    val ad = new AnimalDomain(new Frog)
+    val ad = new AnimalDomain(Some(new Frog))
     ad.soundsFromDomain should be ("Ribbit Ribbit Ribbit ")
   }
 
@@ -32,7 +33,7 @@ class ConstructorInjectionTest extends FunSuite with ShouldMatchers with Severed
       animalModule.unbind[Animal]
 
       // should still work for explicit parameter in constructor
-      val ad = new AnimalDomain(new Frog)(animalModule)
+      val ad = new AnimalDomain(Some(new Frog))(animalModule)
       ad.soundsFromDomain should be ("Ribbit Ribbit Ribbit ")
 
       // but not for binding case any more
@@ -59,7 +60,7 @@ object AnimalModule extends NewBindingModule({ module =>
   module.bind[Animal].toClass[Dog]
 })
 
-class AnimalDomain(an: Animal = injected)(implicit val bindingModule: BindingModule) extends Injectable {
+class AnimalDomain(an: Option[Animal] = injected)(implicit val bindingModule: BindingModule) extends Injectable {
   val animal = injectIfMissing[Animal](an)
 
   def soundsFromDomain(): String = {

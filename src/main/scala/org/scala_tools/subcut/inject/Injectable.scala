@@ -49,8 +49,8 @@ trait Injectable {
    * @param the implToUse from the call site. If it is null, the binding provider will fill it in instead
    * @return an instance configured by the binding module to use for the given trait
    */
-  def injectIfMissing[T <: Any](implToUse: T)(implicit m: scala.reflect.Manifest[T]): T =
-    if (implToUse != null) implToUse
+  def injectIfMissing[T <: Any](implToUse: Option[T])(implicit m: scala.reflect.Manifest[T]): T =
+    if (implToUse != None) implToUse.get
     else inject[T]
 
   /**
@@ -62,8 +62,8 @@ trait Injectable {
    * @param name binding ID symbol to use - e.g. 'maxPoolSize
    * @return an instance configured by the binding module to use for the given trait
    */
-  def injectIfMissing[T <: Any](implToUse: T, name: String)(implicit m: scala.reflect.Manifest[T]): T =
-    if (implToUse != null) implToUse
+  def injectIfMissing[T <: Any](implToUse: Option[T], name: String)(implicit m: scala.reflect.Manifest[T]): T =
+    if (implToUse != None) implToUse.get
     else inject[T](name)
 
   /**
@@ -75,8 +75,8 @@ trait Injectable {
    * @param name binding ID string to use - e.g. 'maxPoolSize
    * @return an instance configured by the binding module to use for the given trait
    */
-  def injectIfMissing[T <: Any](implToUse: T, symbol: Symbol)(implicit m: scala.reflect.Manifest[T]): T =
-    if (implToUse != null) implToUse
+  def injectIfMissing[T <: Any](implToUse: Option[T], symbol: Symbol)(implicit m: scala.reflect.Manifest[T]): T =
+    if (implToUse != None) implToUse.get
     else inject[T](symbol)
 
   /**

@@ -6,7 +6,7 @@
 
     <groupId>org.scala-tools.subcut</groupId>
     <artifactId>subcut</artifactId>
-    <version>0.8-SNAPSHOT</version>
+    <version>0.9-SNAPSHOT</version>
 
     <properties>
         <scala.version>2.9.0</scala.version>

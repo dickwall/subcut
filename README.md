@@ -18,7 +18,7 @@ Documentation
 
 The scaladoc in the source code is reasonably complete, and will continue to be improved. The unit tests
 provide further code examples of how subcut can be used, but does not attempt to demonstrate recommended
-uses or effective recipes. There is a GettingStarted.txt document that spells out the quickest way to get
+uses or effective recipes. There is a [Getting Started](GettingStarted.txt) document that spells out the quickest way to get
 going, and (in the author's opinion), the best way to use subcut effectively.
 
 To create the scaladocs (until I find somewhere to host them) download the source code and use either

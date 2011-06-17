@@ -71,7 +71,7 @@ the latest .jar file for subcut available from the scala-tools maven repository 
 
 For maven:
 
-```maven
+```xml
     <dependency>
       <groupId>org.scala-tools</groupId>
       <artifactId>subcut_2.9.0</artifactId>

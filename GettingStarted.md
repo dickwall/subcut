@@ -25,35 +25,37 @@ This is just one recipe that works, and is my recommendation. There are other wa
 
 1. Include SubCut in your dependencies or download the jar file. There are no further dependencies beyond
    the Scala runtime libraries.
-2. Create a binding module using 
 
-```scala
+2. Create a binding module using
+
+    ```scala
     object SomeConfigurationModule extends NewBindingModule({ module =>
         module.bind[X] toInstance Y
         module.bind[Z] toProvider { codeToGetInstanceOfZ() }
     })
-```
+    ```
 
 3. For all classes you want injection, or for any that you want to make new injectable instances in, add
    to the class declaration: an (implicit val bindingModule: BindingModule) and trait Injectable, e.g:
 
-```scala
+    ```scala
     class SomeServiceOrClass(param1: String, param2: Int)(implicit val bindingModule: BindingModule)
         extends SomeTrait with Injectable {...}
-```
+    ```
 
 4. Within the class where you want to inject bindings, use:
 
-```scala
+    ```scala
     val service1 = injectIfBound[Service1] { new Service1Impl }
-```
+    ```
 
    or similar, the function to the right side of the binding expression is used as default if there is no
    matching binding.
+
 5. For testing, create a obtain a modifiable binding from the normal immutable binding module and rebind
    that:
 
-```scala
+    ```scala
     test("Some test") {
        SomeConfigurationModule.modifyBindings { testModule =>
          testModule.bind[SomeTrait] toInstance new FakeSomeTrait
@@ -61,7 +63,7 @@ This is just one recipe that works, and is my recommendation. There are other wa
          // test stuff...
        }
     }
-```
+    ```
 
 Including SubCut on your project
 ================================

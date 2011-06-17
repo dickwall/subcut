@@ -40,6 +40,7 @@ This is just one recipe that works, and is my recommendation. There are other wa
 ```scala
     class SomeServiceOrClass(param1: String, param2: Int)(implicit val bindingModule: BindingModule)
         extends SomeTrait with Injectable {...}
+```
 
 4. Within the class where you want to inject bindings, use:
 

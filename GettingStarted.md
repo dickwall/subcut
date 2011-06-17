@@ -49,8 +49,8 @@ This is just one recipe that works, and is my recommendation. There are other wa
     val service1 = injectIfBound[Service1] { new Service1Impl }
     ```
 
-   or similar, the function to the right side of the binding expression is used as default if there is no
-   matching binding.
+    or similar, the function to the right side of the binding expression is used as default if there is no
+    matching binding.
 
 5. For testing, create a obtain a modifiable binding from the normal immutable binding module and rebind
    that:

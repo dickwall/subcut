@@ -21,5 +21,4 @@ provide further code examples of how subcut can be used, but does not attempt to
 uses or effective recipes. There is a [Getting Started](https://github.com/dickwall/subcut/blob/master/GettingStarted.md) document that spells out the quickest way to get
 going, and (in the author's opinion), the best way to use subcut effectively.
 
-To create the scaladocs (until I find somewhere to host them) download the source code and use either
-maven or sbt to create them.
+Scaladocs can be found on the [GitHub home page for SubCut](http://dickwall.github.com/subcut).

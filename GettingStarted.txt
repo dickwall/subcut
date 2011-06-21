@@ -88,11 +88,11 @@ bindings that can be used. For more possibilities, see the bottom of this sectio
 To create a new immutable binding module:
 
 object ProjectConfiguration extends NewBindingModule({ module =>
-  module.bind[Database] toInstance new MySQLDatabase
-  module.bind[Analyzer] 'webAnalyzer to instanceOfClass[WebAnalyzer]
-  module.bind[Session] identifiedBy 'currentUser toProvider { WebServerSession.getCurrentUser().getSession() }
-  module.bind[Int] identifiedBy 'maxThreadPoolSize toInstance 10
-  module.bind[WebSearch] toLazyInstance { new GoogleSearchService()(ProjectConfiguration) }
+  module.bind [Database] toInstance new MySQLDatabase
+  module.bind [Analyzer] identifiedBy 'webAnalyzer to instanceOfClass [WebAnalyzer]
+  module.bind [Session] identifiedBy 'currentUser toProvider { WebServerSession.getCurrentUser().getSession() }
+  module.bind [Int] identifiedBy 'maxThreadPoolSize toInstance 10
+  module.bind [WebSearch] toLazyInstance { new GoogleSearchService()(ProjectConfiguration) }
 })
 
 The above bindings are as follows:

@@ -26,26 +26,33 @@ This is just one recipe that works, and is my recommendation. There are other wa
 
 2. Create a binding module using 
 
+           ```scala
            object SomeConfigurationModule extends NewBindingModule({ module =>
              module.bind[X] toInstance Y
              module.bind[Z] toProvider { codeToGetInstanceOfZ() }
            })
+           ```
 
 3. For all classes you want injection, or for any that you want to make new injectable instances in, add
    to the class declaration: an (implicit val bindingModule: BindingModule) and trait Injectable, e.g:
    
+         ```scala
          class SomeServiceOrClass(param1: String, param2: Int)(implicit val bindingModule: BindingModule)
              extends SomeTrait with Injectable {...}
+         ```
 
 4. Within the class where you want to inject bindings, use the following code 
    or similar, the function to the right side of the binding expression is used as default if there is no
    matching binding.
 
+         ```scala
          val service1 = injectIfBound[Service1] { new Service1Impl }
+         ```
 
 5. For testing, create a obtain a modifiable binding from the normal immutable binding module and rebind
    that:
 
+           ```scala
            test("Some test") {
              SomeConfigurationModule.modifyBindings { testModule =>
                testModule.bind[SomeTrait] toInstance new FakeSomeTrait
@@ -53,6 +60,7 @@ This is just one recipe that works, and is my recommendation. There are other wa
                // test stuff...
              }
            }
+           ```
 
 
 ## Including SubCut on your project
@@ -79,7 +87,9 @@ For sbt:
 See the instructions for maven about versions and repo configuration. To use subcut in your project, add
 the dependency:
 
+        ```scala
         val subcut = "org.scala-tools" %% "subcut" % "0.8"
+        ```
 
 replacing 0.8 with the latest (or desired) version of subcut.
 
@@ -91,6 +101,7 @@ bindings that can be used. For more possibilities, see the bottom of this sectio
 
 To create a new immutable binding module:
 
+        ```scala
         object ProjectConfiguration extends NewBindingModule({ module =>
           module.bind [Database] toInstance new MySQLDatabase
           module.bind [Analyzer] identifiedBy 'webAnalyzer to instanceOfClass [WebAnalyzer]
@@ -98,6 +109,7 @@ To create a new immutable binding module:
           module.bind [Int] identifiedBy 'maxThreadPoolSize toInstance 10
           module.bind [WebSearch] toLazyInstance { new GoogleSearchService()(ProjectConfiguration) }
         })
+        ```
 
 The above bindings are as follows:
 
@@ -139,6 +151,7 @@ and makes it easy to find.
 
 To use these bindings in your class, the recommended way is to do as follows:
 
+        ```scala
         class DoStuffOnTheWeb(val siteName: String, val date: Date)(implicit val bindingModule: BindingModule) extends Injectable {
           val webSearch = injectIfBound[WebSearch] { new BingSearchService }
           val maxPoolSize = injectIfBound[Int]('maxThreadPoolSize) { 15 }
@@ -151,7 +164,7 @@ To use these bindings in your class, the recommended way is to do as follows:
             // ...
           }
         }
-
+        ```
 
 Some things to note about the definition:
 
@@ -182,13 +195,17 @@ Some things to note about the definition:
   used. injectIfBound will use the configured definition if one is provided, and if not, it will fall
   back to the provided default on the right hand side of the expression, so for example, in the line:
 
+          ```scala
           val session = injectIfBound[Session]('currentUser) { Session.getCurrent() }
+          ```
 
   subcut will look to see if there is a definition bound to trait Session with id 'currentUser, and if so
   it will use that (in this case there is, so Session.getCurrent() will not be evaluated or used).
   However, for the line:
 
+          ```scala
           val flightLookup = injectIfBound[FlightLookup] { new OrbitzFlightLookup }
+          ```
 
   subcut looks for the trait FlightLookup (with no extra ID name to identify it) and doesn't find one
   bound, so instead falls back to the default expresion to the right, which is evaluated and results in a
@@ -197,7 +214,9 @@ Some things to note about the definition:
   in scope, the compiler will apply those bindings to it automatically for us, so OrbitzFlightLookup
   could be defined as:
 
+          ```scala
           class OrbitzFlightLookup(implicit val bindingModule: BindingModule) extends FlightLookup with Injectable { ... }
+          ```
 
   Note that OrbitzFlightLookup must mix in the FlightLookupTrait in order to satisfy the binding, and
   must still include the implicit parameter list even though it doesn't have any constructor parameters.
@@ -237,14 +256,18 @@ an Injectable class, in order to use a specific module you must do one of two th
 Either, create an implicit value definition before you create the new instance of the top class, like
 this:
 
+        ```scala
         implicit val bindingModule = ProjectConfiguration
         val topInstance = new DoStuffOnTheWeb("stuff", new Date())
+        ```
 
 in which case the binding module will be provided to the DoStuffOnTheWeb automatically, and to all
 instances created inside of that as well (this is how you provide a project wide configuration with a
 single assignment). Alternatively you could use the explicit (shorthand form) which is:
 
+        ```scala
         val topInstance = new DoStuffOnTheWeb("stuff", new Date())(ProjectConfiguration)
+        ```
 
 The explicit is only needed for the first instance, as it is implicitly available to all instances under
 that (it is defined as an implicit in the parameter list - that makes it implicit in the class scope).
@@ -296,9 +319,11 @@ kind of integration plugin to help provide the right configuration.
 In subcut there is an easier way, simply create a new subclass of the Injectable class, and provide a
 definition for the bindingModule that is implicit in the constructor of that subClass, e.g.
 
+        ```scala
         class SomePage(implicit val bindingModule: BindingModule) extends WicketPage with Injectable { }
 
         class ProdSomePage extends SomePage(ProjectConfiguration)
+        ```
 
 You can now register ProdSomePage with the wicket library to be created when needed. It will always be
 bound to the same configuration, but that's normally what you want in production anyway.
@@ -313,6 +338,7 @@ is such a common place to want to change bindings.
 
 A typical test with SubCut overriding will look like this:
 
+        ```scala
         test("Test lookup with mocked out services") {
           ProjectConfiguration.modifyBindings { module =>
             // module now holds a mutable copy of the general bindings, which we can re-bind however we want
@@ -326,6 +352,7 @@ A typical test with SubCut overriding will look like this:
             // etc.
           }
         }
+        ```
 
 
 In this example, the modifyBindings hands us back a copy of the immutable binding module, but in a

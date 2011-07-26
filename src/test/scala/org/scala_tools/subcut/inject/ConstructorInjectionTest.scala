@@ -60,7 +60,7 @@ object AnimalModule extends NewBindingModule({ module =>
   module.bind[Animal].toClass[Dog]
 })
 
-@Inject class AnimalDomain(an: Option[Animal] = injected)(implicit val bindingModule: BindingModule) extends Injectable {
+class AnimalDomain(an: Option[Animal] = injected)(implicit val bindingModule: BindingModule) extends Injectable {
   val animal = injectIfMissing[Animal](an)
 
   def soundsFromDomain(): String = {
@@ -68,8 +68,7 @@ object AnimalModule extends NewBindingModule({ module =>
   }
 }
 
-/*@Inject
-class AnimalDomain2(an: Option[Animal] = injected) {
+/*@Inject class AnimalDomain2(an: Option[Animal]) {
   val animal = injectIfMissing[Animal](an)
 
   def soundsFromDomain(): String = {

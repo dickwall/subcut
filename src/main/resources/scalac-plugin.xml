@@ -1,0 +1,4 @@
+<plugin>
+  <name>injectannotation</name>
+  <classname>org.scala_tools.subcut.inject.AnnotationsInjectPlugin</classname>
+</plugin>

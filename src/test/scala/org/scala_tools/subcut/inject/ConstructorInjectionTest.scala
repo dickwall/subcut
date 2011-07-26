@@ -4,8 +4,8 @@ import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.{SeveredStackTraces, FunSuite}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-import org.scala_tools.subcut.inject.injected
 import scala.Some
+import java.beans.BeanInfo
 
 /**
  * Created by IntelliJ IDEA.
@@ -60,10 +60,19 @@ object AnimalModule extends NewBindingModule({ module =>
   module.bind[Animal].toClass[Dog]
 })
 
-class AnimalDomain(an: Option[Animal] = injected)(implicit val bindingModule: BindingModule) extends Injectable {
+@Inject class AnimalDomain(an: Option[Animal] = injected)(implicit val bindingModule: BindingModule) extends Injectable {
   val animal = injectIfMissing[Animal](an)
 
   def soundsFromDomain(): String = {
     (animal.makeNoise + " ") * 3
   }
 }
+
+/*@Inject
+class AnimalDomain2(an: Option[Animal] = injected) {
+  val animal = injectIfMissing[Animal](an)
+
+  def soundsFromDomain(): String = {
+    (animal.makeNoise * 4).mkString(" ")
+  }
+}*/

@@ -9,7 +9,7 @@
     <version>0.9-SNAPSHOT</version>
 
     <properties>
-        <scala.version>2.9.0</scala.version>
+        <scala.version>2.9.0-1</scala.version>
     </properties>
 
   <repositories>
@@ -48,7 +48,7 @@
     <dependency>
      	<groupId>org.scalatest</groupId>
         <artifactId>scalatest_2.9.0</artifactId>
-        <version>1.4.1</version>
+        <version>1.6.1</version>
         <scope>test</scope>
     </dependency>
     <dependency>

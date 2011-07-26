@@ -8,7 +8,7 @@ class SubCut(info : ProjectInfo) extends DefaultProject(info) with IdeaProject {
 
   val scalatest = buildScalaVersion match {
     case "2.8.0" | "2.8.1" => "org.scalatest" % "scalatest" % "1.3" % "test"
-    case _                 => "org.scalatest" %% "scalatest" % "1.4.1" % "test"
+    case _                 => "org.scalatest" %% "scalatest" % "1.6.1" % "test"
   }
 
   // Dependencies

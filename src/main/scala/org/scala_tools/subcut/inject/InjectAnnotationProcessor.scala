@@ -1,8 +1,10 @@
 package org.scala_tools.subcut.inject
 
-import tools.nsc.transform.Transform
 import tools.nsc.plugins.{Plugin, PluginComponent}
 import tools.nsc.Global
+import tools.nsc.transform.{TypingTransformers, InfoTransform, Transform}
+import com.sun.xml.internal.ws.developer.MemberSubmissionAddressing.Validation
+import tools.nsc.symtab.Flags
 
 /**
  * Created by IntelliJ IDEA.
@@ -17,50 +19,57 @@ class AnnotationsInjectPlugin(val global: Global) extends Plugin {
   val description = "generates code which adds an implicit parameter of type BindingModule, and Injectable trait, on @Inject annotation"
   val components = List[PluginComponent](AnnotationsInjectComponent)
 
-  private object AnnotationsInjectComponent extends PluginComponent with Transform {
+  private object AnnotationsInjectComponent extends PluginComponent with Transform with TypingTransformers {
     val global: AnnotationsInjectPlugin.this.global.type = AnnotationsInjectPlugin.this.global
+    import global._
+
     // val runsAfter = "parser"
     //Using the Scala Compiler 2.8.x the runsAfter should be written as below
     val runsAfter = List[String]("parser")
+    override val runsBefore = List[String]("namer")
     val phaseName = AnnotationsInjectPlugin.this.name
 
-    def newTransformer(unit: global.CompilationUnit) = AnnotationsInjectTransformer
+    def newTransformer(unit: CompilationUnit) = new AnnotationsInjectTransformer (unit)
 
-    object AnnotationsInjectTransformer extends global.Transformer {
-      override def transform(tree: global.Tree): global.Tree = {
-        import global._
-        import global.definitions._
+    class AnnotationsInjectTransformer(unit: CompilationUnit) extends TypingTransformer(unit) {
+      def preTransform(tree: Tree): Tree = {
+
         tree match {
           case cd @ ClassDef(modifiers, name, tparams, classBody) => {
             // TODO: This should not be a string check in the production version
             val injectPresent = cd.mods.annotations.toString.contains("new Inject()")
             if (injectPresent) {
-              warning("@Injecting the class %s".format(name))
-              warning("Old class def")
-              warning(cd.toString)
-              val newInj = Ident("org.scala_tools.subcut.inject.Injectable")
-              val newParents = newInj :: classBody.parents
+              inform("@Injecting the class %s".format(name))
+              //val newInj = Ident(newTypeName("Injectable"))
+              //val newParents = newInj :: classBody.parents
+              val newParents = classBody.parents
 
               val body = classBody.body.map {
                 case item @ DefDef(modifiers, termname, tparams, vparamss, tpt, rhs) =>
                   if (termname.toString == "<init>") {
                     val newMods = Modifiers(536879616L)
-                    val newImplicit = new ValDef(newMods, "bindingModule", Ident("org.scala_tools.subcut.inject.BindingModule"), EmptyTree)
+                    val newImplicit = new ValDef(newMods, "bindingModule", Ident(newTypeName("BindingModule")), EmptyTree)
                     val newParams = vparamss ::: List(List(newImplicit))
-                    super.transform(DefDef(modifiers, termname, tparams, newParams, tpt, rhs))
+                    val newTree = treeCopy.DefDef(item, modifiers, termname, tparams, newParams, tpt, rhs)
+                    newTree
                   }
-                  else { super.transform(item) }
-                case t => super.transform(t)
+                  else { item }
+                case t => t
               }
-              val newClassDef = ClassDef(modifiers, name, tparams, Template(newParents, classBody.self, body))
-              warning("New class def")
-              warning(newClassDef.toString)
-              super.transform(newClassDef)
+
+              val newImpVal = ValDef(Modifiers(Flags.IMPLICIT | Flags.PARAMACCESSOR), "bindingModule", Ident(newTypeName("BindingModule")), EmptyTree)
+
+              treeCopy.ClassDef(cd, modifiers, name, tparams, Template(newParents, classBody.self, newImpVal :: body))
             }
-            super.transform(cd)
+            else cd
           }
-          case t => super.transform(t)
+          case t => t
         }
+      }
+
+      override def transform (tree:Tree):Tree = {
+          val t = preTransform(tree)
+          super.transform(t)
       }
     }
   }

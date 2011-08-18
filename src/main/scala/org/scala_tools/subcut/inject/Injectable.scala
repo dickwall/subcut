@@ -139,6 +139,14 @@ trait Injectable {
 }
 
 /**
+ * AutoInjectable is identical to Injectable except that if you are using the compiler plugin, the implicit
+ * bindingModule parameter will be automatically filled in for you. It is provided as a convenient boilerplate buster
+ * but is distinct from Injectable because sometimes you want to mark something as Injectable but keep the injection
+ * abstract until later.
+ */
+trait AutoInjectable extends Injectable
+
+/**
  * A trait that can be used to provide the cake-like ability to mix in a trait upon instance creation
  * rather than using the implicit parameter. This is less flexible but may still be desired by some
  * developers. To use it, simply create a new trait that extends this one, and provide the definition of

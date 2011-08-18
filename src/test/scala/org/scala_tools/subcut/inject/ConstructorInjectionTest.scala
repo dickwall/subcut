@@ -60,20 +60,10 @@ object AnimalModule extends NewBindingModule({ module =>
   module.bind[Animal].toClass[Dog]
 })
 
-class Home
-
-class AnimalDomain(an: Option[Animal] = injected)(implicit val bindingModule: BindingModule) extends Home with Injectable {
+class AnimalDomain(an: Option[Animal] = injected)(implicit val bindingModule: BindingModule) extends Injectable {
   val animal = injectIfMissing[Animal](an)
 
   def soundsFromDomain(): String = {
     (animal.makeNoise + " ") * 3
   }
 }
-
-/*@Inject class AnimalDomain2(an: Option[Animal] = injected) extends Home with Injectable {
-  val animal = injectIfMissing[Animal](an)
-
-  def soundsFromDomain(): String = {
-    (animal.makeNoise + " ") * 3
-  }
-}*/

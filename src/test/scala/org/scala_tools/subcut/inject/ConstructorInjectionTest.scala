@@ -70,7 +70,7 @@ class AnimalDomain(an: Option[Animal] = injected)(implicit val bindingModule: Bi
   }
 }
 
-/*@Inject class AnimalDomain2(an: Option[Animal] = injected) extends Home with Injectable {
+/*class AnimalDomain2(an: Option[Animal] = injected) extends Home with AutoInjectable {
   val animal = injectIfMissing[Animal](an)
 
   def soundsFromDomain(): String = {

@@ -31,17 +31,16 @@ class AnnotationsInjectPlugin(val global: Global) extends Plugin {
 
     def newTransformer(unit: CompilationUnit) = new AnnotationsInjectTransformer (unit)
 
+    val autoInjectable = "AutoInjectable"
+
     class AnnotationsInjectTransformer(unit: CompilationUnit) extends TypingTransformer(unit) {
       def preTransform(tree: Tree): Tree = {
 
         tree match {
           case cd @ ClassDef(modifiers, name, tparams, classBody) => {
-            // TODO: This should not be a string check in the production version
-            val injectPresent = cd.mods.annotations.toString.contains("new Inject()")
+            val injectPresent = classBody.parents.map(_.toString).contains(autoInjectable)
             if (injectPresent) {
-              inform("@Injecting the class %s".format(name))
-              //val newInj = Ident(newTypeName("Injectable"))
-              //val newParents = newInj :: classBody.parents
+              inform("AutoInjecting class %s".format(name))
               val newParents = classBody.parents
 
               val body = classBody.body.map {

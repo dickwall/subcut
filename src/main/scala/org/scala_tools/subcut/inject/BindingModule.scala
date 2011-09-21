@@ -11,7 +11,7 @@ import scala.collection._
 /**
  * The binding key, used to uniquely identify the desired injection using the class and an optional name.
  */
-private[inject] case class BindingKey(val clazz: Class[Any], val name: Option[String])
+private[inject] case class BindingKey[A](m: Manifest[A], name: Option[String])
 
 /**
  * The main BindingModule trait.
@@ -22,7 +22,7 @@ private[inject] case class BindingKey(val clazz: Class[Any], val name: Option[St
 trait BindingModule { outer =>
 
   /** Abstract binding map definition */
-  def bindings: immutable.Map[BindingKey, Any]
+  def bindings: immutable.Map[BindingKey[_], Any]
   
   /**
    * Cons this module with another. The resulting module will include all bindings from both modules, with this
@@ -58,8 +58,8 @@ trait BindingModule { outer =>
    * @param name an optional name to use for the binding match
    * @return the instance the binding was configured to return
    */
-  def inject[T <: Any](clazz: Class[T], name: Option[String]): T = {
-    val key = BindingKey(clazz.asInstanceOf[Class[Any]], name)
+  def inject[T <: Any : Manifest](name: Option[String]): T = {
+    val key = BindingKey(manifest, name)
     injectOptional[T](key) match {
       case None => throw new BindingException("No binding for key " + key)
       case Some(instance) => instance
@@ -78,8 +78,8 @@ trait BindingModule { outer =>
    * @return Option[T] containing either an instance subtype of T, or None if no matching
    * binding is found.
    */
-  def injectOptional[T <: Any](clazz: Class[T], name: Option[String]): Option[T] =
-    injectOptional(BindingKey(clazz.asInstanceOf[Class[Any]], name))
+  def injectOptional[T <: Any : Manifest](name: Option[String]): Option[T] =
+    injectOptional(BindingKey(manifest, name))
 
 
   /**
@@ -91,7 +91,7 @@ trait BindingModule { outer =>
    * @return Option[T] containing either an instance subtype of T, or None if no matching
    * binding is found.
    */
-  def injectOptional[T <: Any](key: BindingKey): Option[T] = {
+  def injectOptional[T](key: BindingKey[T]): Option[T] = {
     // common sense check - many binding maps are empty, we can short circuit all lookup if it is
     // and just return None
     if (bindings.isEmpty) None else {
@@ -166,14 +166,14 @@ class NewBindingModule(fn: MutableBindingModule => Unit) extends BindingModule {
  */
 trait MutableBindingModule extends BindingModule { outer =>
 
-  @volatile private[this] var _bindings = immutable.Map.empty[BindingKey, Any]
+  @volatile private[this] var _bindings = immutable.Map.empty[BindingKey[_], Any]
   @volatile private[this] var _frozen = false
 
   private[inject] def bindings_=(newBindings: BindingModule) {
     ensureNotFrozen()
     this._bindings = newBindings.bindings
   }
-  private[inject] def bindings_=(newBindings: immutable.Map[BindingKey, Any]) {
+  private[inject] def bindings_=(newBindings: immutable.Map[BindingKey[_], Any]) {
     ensureNotFrozen()
     this._bindings = newBindings
   }
@@ -207,12 +207,12 @@ trait MutableBindingModule extends BindingModule { outer =>
    */
   def frozen: Boolean = _frozen
 
-  def ensureNotFrozen() = {
+  def ensureNotFrozen() {
     if (_frozen) throw new BindingException("Module is frozen, no further bindings allowed")
   }
 
   private def bindingKey[T](m: Manifest[T], name: Option[String]) =
-    BindingKey(m.erasure.asInstanceOf[Class[Any]], name)
+    BindingKey(m, name)
 
   /**
    * Merge in bindings from another binding module, replacing any conflicts with the new bindings from the
@@ -220,7 +220,7 @@ trait MutableBindingModule extends BindingModule { outer =>
    * regular bindings.
    * @param other A BindingModules with bindings to merge and/or replace the bindings in this module.
    */
-  def mergeWithReplace(other: BindingModule) = {
+  def mergeWithReplace(other: BindingModule) {
     this.bindings = this.bindings ++ other.bindings
   }
 
@@ -229,7 +229,7 @@ trait MutableBindingModule extends BindingModule { outer =>
    * supplied. This will effectively unbind anything currently bound that is not bound in the new module.
    * @param other the other binding module with which to replace the current bindings.
    */
-  def replaceBindings(other: BindingModule) = {
+  def replaceBindings(other: BindingModule) {
     this.bindings = other.bindings
   }
 
@@ -239,7 +239,7 @@ trait MutableBindingModule extends BindingModule { outer =>
    * last in wins, so if you have <code>withBindingModule(ModuleA, ModuleB)</code> and both ModuleA and ModuleB
    * bind the same class (and optional name), ModuleB will win.
    */
-  def withBindingModules(modules: BindingModule*) = {
+  def withBindingModules(modules: BindingModule*) {
     if (!this.bindings.isEmpty) throw new BindingException("withBindingModules may only be used on an empty module for initialization")
     for (module <- modules) mergeWithReplace(module)
   }
@@ -315,7 +315,7 @@ trait MutableBindingModule extends BindingModule { outer =>
    * A convenient way to list the current bindings in the binding module. Useful for debugging purposes.
    * Prints to standard out.
    */
-  def showMap() = {
+  def showMap() {
     println(mapString.mkString("\n"))
   }
 

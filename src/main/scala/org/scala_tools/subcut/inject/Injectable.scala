@@ -17,7 +17,7 @@ trait Injectable {
    * @return an instance configured by the binding module to use for the given trait.
    */
   def inject[T <: Any](implicit m: scala.reflect.Manifest[T]): T =
-    bindingModule.inject(m.erasure.asInstanceOf[Class[T]], None)
+    bindingModule.inject[T](None)
 
   /**
    * Inject an instance for the given trait based on the class type required and an ID symbol. If there is no
@@ -28,7 +28,7 @@ trait Injectable {
    * @return an instance configured by the binding module to use for the given trait and ID
    */
   def inject[T <: Any](symbol: Symbol)(implicit m: scala.reflect.Manifest[T]): T =
-    bindingModule.inject(m.erasure.asInstanceOf[Class[T]], Some(symbol.name))
+    bindingModule.inject[T](Some(symbol.name))
 
   /**
    * Inject an instance for the given trait based on the class type required and an ID string. If there is no
@@ -39,7 +39,7 @@ trait Injectable {
    * @return an instance configured by the binding module to use for the given trait and ID
    */
   def inject[T <: Any](name: String)(implicit m: scala.reflect.Manifest[T]): T =
-    bindingModule.inject(m.erasure.asInstanceOf[Class[T]], Some(name))
+    bindingModule.inject[T](Some(name))
 
   /**
    * Inject an instance for the given trait based on the class type only if there is no instance already provided.
@@ -90,7 +90,7 @@ trait Injectable {
    * function if no matching binding is defined.
    */
   def injectIfBound[T <: Any](fn: => T)(implicit m: scala.reflect.Manifest[T]): T = {
-    bindingModule.injectOptional(m.erasure.asInstanceOf[Class[Any]], None) match {
+    bindingModule.injectOptional[T](None) match {
       case None => // must then have a valid impltouse
         val implToUse = fn
         if (implToUse == null)
@@ -112,7 +112,7 @@ trait Injectable {
    * function if no matching binding is defined.
    */
   def injectIfBound[T <: Any](name: String)(fn: => T)(implicit m: scala.reflect.Manifest[T]): T = {
-    bindingModule.injectOptional(m.erasure.asInstanceOf[Class[Any]], Some(name)) match {
+    bindingModule.injectOptional[T](Some(name)) match {
       case None => // must then have a valid impltouse
         val implToUse = fn
         if (implToUse == null)

@@ -28,7 +28,7 @@ This is just one recipe that works, and is my recommendation. There are other wa
 
     ```scala
     object SomeConfigurationModule extends NewBindingModule({ module =>
-      module.bind[X] toInstance Y
+      module.bind[X] toSingleInstance Y
       module.bind[Z] toProvider { codeToGetInstanceOfZ() }
     })
     ```
@@ -55,7 +55,7 @@ This is just one recipe that works, and is my recommendation. There are other wa
     ```scala
     test("Some test") {
        SomeConfigurationModule.modifyBindings { testModule =>
-         testModule.bind [SomeTrait] toInstance new FakeSomeTrait
+         testModule.bind [SomeTrait] toSingleInstance new FakeSomeTrait
          val testInstance = new SomeServiceOrClass(param1, param2)(testModule)
          // test stuff...
        }
@@ -71,15 +71,15 @@ For maven:
 
 ```xml
     <dependency>
-      <groupId>org.scala-tools</groupId>
-      <artifactId>subcut_2.9.0</artifactId>
-      <version>0.8</version>
+      <groupId>org.scala-tools.subcut</groupId>
+      <artifactId>subcut_2.9.1</artifactId>
+      <version>1.0-SNAPSHOT</version>
     </dependency>
 ```
 
-replace _2.9.0 with the version of Scala you are using (note, for 2.9.0-1, use _2.9.0 as there is no
-separate build for this point version). Replace 0.8 with whatever the latest stable version of subcut is.
-Snapshot builds are also available from the scala-tools snapshot repo. Note that if you don't have the
+replace _2.9.1 with the version of Scala you are using.
+Replace 1.0-SNAPSHOT with whatever the latest stable version of subcut is (or skip -SNAPSHOT if you want a release).
+Snapshot and release builds are available from the scala-tools snapshot repo. Note that if you don't have the
 scala-tools repo in your list of maven repositories, see http://scala-tools.org for details on how to add
 it.
 
@@ -89,10 +89,10 @@ See the instructions for maven about versions and repo configuration. To use sub
 the dependency:
 
 ```scala
-    val subcut = "org.scala-tools" %% "subcut" % "0.8"
+    "org.scala-tools.subcut" %% "subcut" % "1.0-SNAPSHOT"
 ```
 
-replacing 0.8 with the latest (or desired) version of subcut.
+replacing 1.0-SNAPSHOT with the latest (or desired) version of subcut.
 
 
 ## Setting up a configuration module
@@ -104,11 +104,12 @@ To create a new immutable binding module:
 
 ```scala
     object ProjectConfiguration extends NewBindingModule({ module =>
-      module.bind [Database] toInstance new MySQLDatabase
-      module.bind [Analyzer] identifiedBy 'webAnalyzer to instanceOfClass [WebAnalyzer]
-      module.bind [Session] identifiedBy 'currentUser toProvider { WebServerSession.getCurrentUser().getSession() }
-      module.bind [Int] identifiedBy 'maxThreadPoolSize toInstance 10
-      module.bind [WebSearch] toLazyInstance { new GoogleSearchService()(ProjectConfiguration) }
+      import module._   // can now use bind directly
+      bind [Database] toSingleInstance new MySQLDatabase
+      bind [Analyzer] identifiedBy 'webAnalyzer to instanceOfClass [WebAnalyzer]
+      bind [Session] identifiedBy 'currentUser toProvider { WebServerSession.getCurrentUser().getSession() }
+      bind [Int] identifiedBy 'maxThreadPoolSize toSingleInstance 10
+      bind [WebSearch] toSingleInstance { new GoogleSearchService()(ProjectConfiguration) }
     })
 ```
 
@@ -133,7 +134,7 @@ you can bind common types like Int and String without an identifying name, doing
 since the resulting binding will be very broad and could be picked up accidentally.
 
 The final binding, trait WebSearch is bound lazily to a single instance obtained by the provided method.
-There are a couple of things to note about this binding. The toLazyInstance will defer the instance from
+There are a couple of things to note about this binding. The toSingleInstance will defer the instance from
 being created until the first time it is bound, but after that the same instance will always be returned
 for that binding. The lazy binding is necessary in this case for the second reason - a specific binding
 configuration is provided to the GoogleSearchService constructor in the form of a second curried
@@ -341,10 +342,11 @@ A typical test with SubCut overriding will look like this:
 ```scala
     test("Test lookup with mocked out services") {
       ProjectConfiguration.modifyBindings { module =>
+        import module._
         // module now holds a mutable copy of the general bindings, which we can re-bind however we want
-        module.bind[Int] identifiedBy 'maxThreadPoolSize to None    // unbind and use the default
-        module.bind[WebSearch] toInstance new FakeWebSearchService  // use a fake service defined elsewhere
-        module.bind[FlightLookup] toInstance new FakeFlightLookup   // ditto
+        bind[Int] identifiedBy 'maxThreadPoolSize to None    // unbind and use the default
+        bind[WebSearch] toSingleInstance new FakeWebSearchService  // use a fake service defined elsewhere
+        bind[FlightLookup] toSingleInstance new FakeFlightLookup   // ditto
 
         val doStuff = new DoStuffOnTheWeb("test", new Date())(module)
 

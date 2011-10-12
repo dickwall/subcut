@@ -58,11 +58,11 @@ class Impl1b extends DoIt1 {
 }
 
 object ImplicitModule1 extends MutableBindingModule {
-  bind [DoIt1] toInstance (new Impl1a)
+  bind [DoIt1] toSingleInstance (new Impl1a)
 }
 
 object ImplicitModule2 extends MutableBindingModule {
-  bind [DoIt1] toInstance (new Impl1b)
+  bind [DoIt1] toSingleInstance (new Impl1b)
 }
 
 trait ImplicitBinding {

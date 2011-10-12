@@ -25,14 +25,14 @@ trait BindingModule { outer =>
   def bindings: immutable.Map[BindingKey, Any]
   
   /**
-   * Cons this module with another. The resulting module will include all bindings from both modules, with this
+   * Merge this module with another. The resulting module will include all bindings from both modules, with this
    * module winning if there are common bindings (binding override).
    * @param other another BindingModule to cons with this one. Any duplicates will favor the bindings from this
    * rather than other.
    */
-  def ::(other: BindingModule): BindingModule = {
+  def ~(other: BindingModule): BindingModule = {
     new BindingModule {
-      override val bindings = outer.bindings ++ other.bindings
+      override val bindings = other.bindings ++ outer.bindings
     }
   }
 
@@ -119,11 +119,11 @@ trait BindingModule { outer =>
  * To use this class:
  * <p/>
  * <pre>
- * class ProductionBindings extends NewBindingModule({ module =>
- *    module.bind[DBLookup] toInstance new MySQLLookup
+ * class ProductionBindings extends NewBindingModule({ implicit module =>
+ *    module.bind[DBLookup] toSingleInstance new MySQLLookup
  *    module.bind[WebService].toClass[RealWebService]
- *    module.bind[Int] identifiedBy 'maxPoolSize toInstance 10
- *    module.bind[QueryService] toLazyInstance { new SlowInitQueryService }
+ *    module.bind[Int] identifiedBy 'maxPoolSize toSingleInstance 10
+ *    module.bind[QueryService] toSingleInstance { new SlowInitQueryService }
  * })
  * </pre>
  * @param fn a function that takes a mutable binding module and initializes it with whatever bindings
@@ -153,13 +153,13 @@ class NewBindingModule(fn: MutableBindingModule => Unit) extends BindingModule {
  * <p/>
  * An example usage will look like this:
  * <pre>
- * class SomeBindings extends NewBindingModule ({ module =>
- *   module.bind[Trait1] toInstance new Class1Impl
+ * class SomeBindings extends NewBindingModule ({ implicit module =>
+ *   module.bind[Trait1] toSingleInstance new Class1Impl
  * })
  *
  * // in a test...
  * SomeBindings.modifyBindings { testBindings =>  // holds mutable copy of SomeBindings
- *   module.bind[Trait1] toInstance mockClass1Impl  // where the mock has been set up already
+ *   module.bind[Trait1] toSingleInstance mockClass1Impl  // where the mock has been set up already
  *   // run tests using the mockClass1Impl
  * }  // coming out of scope destroys the temporary mutable binding module
  * </pre>
@@ -223,6 +223,19 @@ trait MutableBindingModule extends BindingModule { outer =>
   def mergeWithReplace(other: BindingModule) = {
     this.bindings = this.bindings ++ other.bindings
   }
+
+  /**
+   * Convenience form of merge with replace, can be used like this:
+   *
+   * <pre>
+   * class SomeBindings extends NewBindingModule ({ module =>
+   *   module <~ OtherModule1   // include all bindings from Module1
+   *   module <~ OtherModule2   // include all bindings from Module2, overwriting as necessary
+   *   module.bind[Trait1] toSingleInstance new Class1Impl
+   * })
+   * </pre>
+   */
+  def <~(other: BindingModule) = mergeWithReplace(other)
 
   /**
    * Replace the current bindings configuration module completely with the bindings from the other module
@@ -350,20 +363,6 @@ trait MutableBindingModule extends BindingModule { outer =>
     var name: Option[String] = None
 
     /**
-     * Bind to a single instance of I where I is an instance of any subtype of T. This will effectively provide
-     * a singleton binding for any injected instance. As such, any instances used here should be thread safe if
-     * they are to be used in threaded execution.
-     * @param instance a single instance of type I <: T. The same instance will be returned for any matching binding.
-     */
-    def toInstance[I <: T](instance: I) = {
-      name match {
-        case Some(n) => outer.bindInstance[T](n, instance)
-        case None => outer.bindInstance[T](instance)
-      }
-      name = None
-    }
-
-    /**
      * Bind to a provider of type I where I is any subtype of T. The provider is a by-name function that returns
      * an instance of type I, and may perform any necessary operation in order to provide I, for example if
      * the current web session is to be injected, the provider may use whatever mechanism is required to obtain
@@ -372,7 +371,7 @@ trait MutableBindingModule extends BindingModule { outer =>
      * each time, or the same one, or anything in between.
      * @param function a by-name function returning type I where I is a subtype of the bound type T.
      */
-    def toProvider[I <: T](function: => I) = {
+    def toProvider[I <: T](function: => I) {
       name match {
         case Some(n) => outer.bindProvider[T](n, function _)
         case None => outer.bindProvider[T](function _)
@@ -392,7 +391,7 @@ trait MutableBindingModule extends BindingModule { outer =>
      * @param function a by-name function that is evaluated on the first injection of this binding, and after that
      * will always return the same instance I, where I is any subtype of T.
      */
-    def toLazyInstance[I <: T](function: => I) = {
+    def toSingleInstance[I <: T](function: => I) = {
       name match {
         case Some(n) => outer.bindLazyInstance[T](n, function _)
         case None => outer.bindLazyInstance[T](function _)
@@ -425,8 +424,8 @@ trait MutableBindingModule extends BindingModule { outer =>
      */
     def to(instOfClass: ClassInstanceProvider[T]) = {
       name match {
-        case Some(n) => outer.bindClass[T](n, instanceOfClass)
-        case None => outer.bindClass[T](instanceOfClass)
+        case Some(n) => outer.bindClass[T](n, instOfClass)
+        case None => outer.bindClass[T](instOfClass)
       }
       name = None
     }
@@ -465,7 +464,7 @@ trait MutableBindingModule extends BindingModule { outer =>
      * interchangeable, i.e. 'maxPoolSize and "maxPoolSize" are equivalent both in definition and in usage.
      * <p/>
      * Typical usage:
-     * <code>module.bind[Int] identifiedBy "maxPoolSize" toInstance 30</code>
+     * <code>module.bind[Int] identifiedBy "maxPoolSize" toSingleInstance 30</code>
      * @param n the string name to identify this binding when used in combination with the type parameter.
      */
     def identifiedBy(n: String) = {
@@ -480,7 +479,7 @@ trait MutableBindingModule extends BindingModule { outer =>
      * interchangeable, i.e. 'maxPoolSize and "maxPoolSize" are equivalent both in definition and in usage.
      * <p/>
      * Typical usage:
-     * <code>module.bind[Int] identifiedBy 'maxPoolSize toInstance 30</code>
+     * <code>module.bind[Int] identifiedBy 'maxPoolSize toSingleInstance 30</code>
      * @param symbol the symbol name to identify this binding when used in combination with the type parameter.
      */
     def identifiedBy(symbol: Symbol) = {

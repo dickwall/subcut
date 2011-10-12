@@ -16,7 +16,7 @@ import tools.nsc.symtab.Flags
 
 class AnnotationsInjectPlugin(val global: Global) extends Plugin {
   val name = "annotations-inject-implicit"
-  val description = "generates code which adds an implicit parameter of type BindingModule, and Injectable trait, on @Inject annotation"
+  val description = "generates code which adds an implicit parameter of type BindingModule when an AutoInjectable trait is mixed in"
   val components = List[PluginComponent](AnnotationsInjectComponent)
 
   private object AnnotationsInjectComponent extends PluginComponent with Transform with TypingTransformers {
@@ -32,22 +32,27 @@ class AnnotationsInjectPlugin(val global: Global) extends Plugin {
     def newTransformer(unit: CompilationUnit) = new AnnotationsInjectTransformer (unit)
 
     val autoInjectable = "AutoInjectable"
+    val bindingModule = "bindingModule"
+    val bindingModuleType = "BindingModule"
+    val constructorMethod = "<init>"
 
     class AnnotationsInjectTransformer(unit: CompilationUnit) extends TypingTransformer(unit) {
       def preTransform(tree: Tree): Tree = {
+
+        import Flags._
 
         tree match {
           case cd @ ClassDef(modifiers, name, tparams, classBody) => {
             val injectPresent = classBody.parents.map(_.toString).contains(autoInjectable)
             if (injectPresent) {
-              inform("AutoInjecting class %s".format(name))
+              log("AutoInjecting class %s".format(name))
               val newParents = classBody.parents
 
               val body = classBody.body.map {
                 case item @ DefDef(modifiers, termname, tparams, vparamss, tpt, rhs) =>
-                  if (termname.toString == "<init>") {
-                    val newMods = Modifiers(536879616L)
-                    val newImplicit = new ValDef(newMods, "bindingModule", Ident(newTypeName("BindingModule")), EmptyTree)
+                  if (termname.toString == constructorMethod) {
+                    val newMods = Modifiers(IMPLICIT | PARAM | PARAMACCESSOR)
+                    val newImplicit = new ValDef(newMods, bindingModule, Ident(newTypeName(bindingModuleType)), EmptyTree)
                     val newParams = vparamss ::: List(List(newImplicit))
                     val newTree = treeCopy.DefDef(item, modifiers, termname, tparams, newParams, tpt, rhs)
                     newTree
@@ -56,7 +61,7 @@ class AnnotationsInjectPlugin(val global: Global) extends Plugin {
                 case t => t
               }
 
-              val newImpVal = ValDef(Modifiers(Flags.IMPLICIT | Flags.PARAMACCESSOR), "bindingModule", Ident(newTypeName("BindingModule")), EmptyTree)
+              val newImpVal = ValDef(Modifiers(IMPLICIT | PARAMACCESSOR), bindingModule, Ident(newTypeName(bindingModuleType)), EmptyTree)
 
               treeCopy.ClassDef(cd, modifiers, name, tparams, Template(newParents, classBody.self, newImpVal :: body))
             }

@@ -64,19 +64,19 @@ class PlainScalaInjectInBindingTest extends FunSuite with ShouldMatchers {
     
     val bindingModule = this
     
-    bind [EchoService] toLazyInstance new EchoService
+    bind [EchoService] toSingleInstance new EchoService
     
-    bind [EchoClient] identifiedBy "constructorStyle" toLazyInstance {
+    bind [EchoClient] identifiedBy "constructorStyle" toSingleInstance {
       new EchoClientConstructorDeps(inject[EchoService])
     }
     
-    bind [EchoClient] identifiedBy "defOverrideStyle" toLazyInstance {
+    bind [EchoClient] identifiedBy "defOverrideStyle" toSingleInstance {
       new EchoClientDefDeps {
         override def echoService = inject[EchoService]
       }
     }
 
-    bind [EchoClient] identifiedBy "propertyStyle" toLazyInstance {
+    bind [EchoClient] identifiedBy "propertyStyle" toSingleInstance {
       new EchoClientPropertyDeps() {
         echoService = inject[EchoService]
       }

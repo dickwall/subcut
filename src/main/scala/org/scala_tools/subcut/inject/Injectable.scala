@@ -9,7 +9,7 @@ package org.scala_tools.subcut.inject
  * can provide flexible and mostly invisible bindings all the way down an object instance creation chain.
  */
 trait Injectable {
-  val bindingModule: BindingModule
+  def bindingModule: BindingModule
 
   /**
    * Inject an instance for the given trait based on the class type required. If there is no binding, this

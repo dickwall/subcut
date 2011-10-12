@@ -57,7 +57,8 @@ class Dog extends Animal {
 }
 
 object AnimalModule extends NewBindingModule({ module =>
-  module.bind[Animal].toClass[Dog]
+  import module._
+  bind[Animal].toClass[Dog]
 })
 
 class Home

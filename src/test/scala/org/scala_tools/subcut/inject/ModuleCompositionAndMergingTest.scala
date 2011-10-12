@@ -16,13 +16,13 @@ import org.junit.runner.RunWith
 class ModuleCompositionAndMergingTest extends FunSuite with ShouldMatchers with SeveredStackTraces {
 
   test("Modules should be composable the :: operator") {
-    implicit def billsBindings = MediumGardenModule :: LawnModule :: LarchModule
+    implicit def billsBindings = MediumGardenModule ~ LawnModule ~ LarchModule
     val billsGarden = new Garden    // will pick up the configuration module implicitly
     billsGarden.describeGarden should be ("The garden is 200 sq ft, has a Larch tree 120 high, Grass ground covering that cost 50 initially and 25 maintenance")
   }
 
   test("Modules using the :: operator should have left to right priority") {
-    implicit def sallysBindings = SmallGardenModule :: MediumGardenModule :: OakModule :: LawnModule :: LarchModule
+    implicit def sallysBindings = SmallGardenModule ~ MediumGardenModule ~ OakModule ~ LawnModule ~ LarchModule
     val sallysGarden = new Garden    // will pick up the configuration module implicitly
     sallysGarden.describeGarden should be ("The garden is 50 sq ft, has a Oak tree 150 high, Grass ground covering that cost 50 initially and 25 maintenance")
   }
@@ -37,27 +37,27 @@ class ModuleCompositionAndMergingTest extends FunSuite with ShouldMatchers with 
 // let's make some modules to bind in
 
 object LarchModule extends NewBindingModule({ module =>
-  module.bind [Tree] toInstance { new Larch }
+  module.bind [Tree] toSingleInstance { new Larch }
 })
 
 object OakModule extends NewBindingModule({ module =>
-  module.bind [Tree] toInstance { new Oak }
+  module.bind [Tree] toSingleInstance { new Oak }
 })
 
 object LawnModule extends NewBindingModule({ module =>
-  module.bind [GroundCover] toInstance { new Lawn }
+  module.bind [GroundCover] toSingleInstance { new Lawn }
 })
 
 object PavedModule extends NewBindingModule({ module =>
-  module.bind [GroundCover] toInstance { new Paved }
+  module.bind [GroundCover] toSingleInstance { new Paved }
 })
 
 object SmallGardenModule extends NewBindingModule({ module =>
-  module.bind [GardenPlot] toInstance { new SmallGardenPlot }
+  module.bind [GardenPlot] toSingleInstance { new SmallGardenPlot }
 })
 
 object MediumGardenModule extends NewBindingModule({ module =>
-  module.bind [GardenPlot] toInstance { new MediumGardenPlot }
+  module.bind [GardenPlot] toSingleInstance { new MediumGardenPlot }
 })
 
 class Garden(implicit val bindingModule: BindingModule) extends Injectable {

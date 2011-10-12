@@ -27,7 +27,7 @@ class InjectConfigValuesTest extends FunSuite with ShouldMatchers with SeveredSt
   test("inject some default configuration values using some unbound") {
     ConfigValueModule.modifyBindings { configValueModule =>
       configValueModule.unbind[Int]('poolSize)
-      configValueModule.bind [Int] identifiedBy 'minPoolSize toInstance (5)
+      configValueModule.bind [Int] identifiedBy 'minPoolSize toSingleInstance (5)
 
       implicit val bindings = configValueModule
 
@@ -41,12 +41,12 @@ class InjectConfigValuesTest extends FunSuite with ShouldMatchers with SeveredSt
   }
 }
 
-object ConfigValueModule extends NewBindingModule ({ module =>
-  module.bind [Int] identifiedBy 'poolSize toInstance 20
-  module.bind [Int] identifiedBy 'maxUsers toInstance 15
-  module.bind [Double] identifiedBy 'threshold toInstance 0.2
-  module.bind [Int] toInstance 1 // probably wouldn't ever do this, but we need to test it
-  module.bind [Int] identifiedBy "theOther" toInstance 2
+object ConfigValueModule extends NewBindingModule ({implicit module =>
+  module.bind [Int] identifiedBy 'poolSize toSingleInstance 20
+  module.bind [Int] identifiedBy 'maxUsers toSingleInstance 15
+  module.bind [Double] identifiedBy 'threshold toSingleInstance 0.2
+  module.bind [Int] toSingleInstance 1 // probably wouldn't ever do this, but we need to test it
+  module.bind [Int] identifiedBy "theOther" toSingleInstance 2
 })
 
 class ConfigValueInstance(implicit val bindingModule: BindingModule) extends Injectable {

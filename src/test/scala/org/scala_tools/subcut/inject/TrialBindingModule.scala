@@ -73,10 +73,10 @@ object TrialBindingModule extends MutableBindingModule {
   bind [TestTrait] identifiedBy 'testConfig toProvider (new AlternativeImpl)
   bind [TestTrait] identifiedBy "something else" toProvider { new AlternativeImpl }
   println("Before fixed binding")
-  bind [TestTrait] identifiedBy 'fixed toLazyInstance { new AlternativeImpl2 }
+  bind [TestTrait] identifiedBy 'fixed toSingleInstance { new AlternativeImpl2 }
   println("After fixed binding")
 
-  bind [AnotherTrait] toInstance new AnotherTraitImpl
+  bind [AnotherTrait] toSingleInstance new AnotherTraitImpl
   this.showMap()
 }
 

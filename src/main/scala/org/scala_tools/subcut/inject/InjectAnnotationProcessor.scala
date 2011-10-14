@@ -33,8 +33,21 @@ class AnnotationsInjectPlugin(val global: Global) extends Plugin {
 
     val autoInjectable = "AutoInjectable"
     val bindingModule = "bindingModule"
-    val bindingModuleType = "BindingModule"
+    //val bindingModuleType = "BindingModule"
     val constructorMethod = "<init>"
+
+    val bindingModuleType =
+      Select(
+        Select(
+          Select(
+            Select(
+              Select(
+                Ident(newTermName("_root_")),
+                  newTermName("org")),
+                newTermName("scala_tools")),
+              newTermName("subcut")),
+            newTermName("inject")),
+          newTypeName("BindingModule"))
 
     class AnnotationsInjectTransformer(unit: CompilationUnit) extends TypingTransformer(unit) {
       def preTransform(tree: Tree): Tree = {
@@ -52,7 +65,7 @@ class AnnotationsInjectPlugin(val global: Global) extends Plugin {
                 case item @ DefDef(modifiers, termname, tparams, vparamss, tpt, rhs) =>
                   if (termname.toString == constructorMethod) {
                     val newMods = Modifiers(IMPLICIT | PARAM | PARAMACCESSOR)
-                    val newImplicit = new ValDef(newMods, bindingModule, Ident(newTypeName(bindingModuleType)), EmptyTree)
+                    val newImplicit = new ValDef(newMods, bindingModule, bindingModuleType, EmptyTree)
                     val newParams = vparamss ::: List(List(newImplicit))
                     val newTree = treeCopy.DefDef(item, modifiers, termname, tparams, newParams, tpt, rhs)
                     newTree
@@ -61,7 +74,7 @@ class AnnotationsInjectPlugin(val global: Global) extends Plugin {
                 case t => t
               }
 
-              val newImpVal = ValDef(Modifiers(IMPLICIT | PARAMACCESSOR), bindingModule, Ident(newTypeName(bindingModuleType)), EmptyTree)
+              val newImpVal = ValDef(Modifiers(IMPLICIT | PARAMACCESSOR), bindingModule, bindingModuleType, EmptyTree)
 
               treeCopy.ClassDef(cd, modifiers, name, tparams, Template(newParents, classBody.self, newImpVal :: body))
             }

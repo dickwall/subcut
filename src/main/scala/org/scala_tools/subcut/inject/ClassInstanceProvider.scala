@@ -20,12 +20,18 @@ private[inject] class ClassInstanceProvider[I <: Any](val clazz: Class[Any]) {
           format(clazz.getName))
     }
   }
+
+  override def toString = "ClassInstanceProvider[%s]".format(clazz.getName)
 }
 
 private[inject] class LazyInstanceProvider[I <: Any](fn: () => I) {
   lazy val instance: I = fn()    // create an instance the first time we use it, and always use that
+
+  override def toString = "LazyInstanceProvider[%s]".format(fn.toString)
 }
 
 private[inject] class NewInstanceProvider[I <: Any](fn: () => I) {
   def instance: I = fn()     // create a new instance each time we ask for one
+
+  override def toString = "NewInstanceProvider[%s]".format(fn.toString)
 }

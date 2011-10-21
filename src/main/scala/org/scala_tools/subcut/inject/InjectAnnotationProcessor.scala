@@ -33,7 +33,6 @@ class AnnotationsInjectPlugin(val global: Global) extends Plugin {
 
     val autoInjectable = "AutoInjectable"
     val bindingModule = "bindingModule"
-    //val bindingModuleType = "BindingModule"
     val constructorMethod = "<init>"
 
     val bindingModuleType =
@@ -42,12 +41,13 @@ class AnnotationsInjectPlugin(val global: Global) extends Plugin {
           Select(
             Select(
               Select(
-                Ident(newTermName("_root_")),
-                  newTermName("org")),
-                newTermName("scala_tools")),
-              newTermName("subcut")),
-            newTermName("inject")),
-          newTypeName("BindingModule"))
+                Ident(
+                  newTermName("_root_")),
+                newTermName("org")),
+              newTermName("scala_tools")),
+            newTermName("subcut")),
+          newTermName("inject")),
+        newTypeName("BindingModule"))
 
     class AnnotationsInjectTransformer(unit: CompilationUnit) extends TypingTransformer(unit) {
       def preTransform(tree: Tree): Tree = {

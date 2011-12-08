@@ -8,19 +8,19 @@ import org.scalatest.FunSuite
 class PlainScalaInjectInBindingTest extends FunSuite with ShouldMatchers {
 
   test("inject method is used as service locator for plain Scala constructor style dependency injection during binding") {
-	  val client = EchoModule.inject(classOf[EchoClient],Some("constructorStyle"))
+	  val client = EchoModule.inject [EchoClient] (Some("constructorStyle"))
 	  val result = client.callEcho("Hallooo")
 	  result should equal ("Hallooo Constructor Style")	  
   } 
   
   test("inject method is used as service locator for plain Scala def override style dependency injection during binding") {
-	  val client = EchoModule.inject(classOf[EchoClient],Some("defOverrideStyle"))
+	  val client = EchoModule.inject [EchoClient] (Some("defOverrideStyle"))
 	  val result = client.callEcho("Hallooo")
 	  result should equal ("Hallooo Def Override Style")	  
   }  
   
   test("inject method is used as service locator for plain Scala property style dependency injection during binding") {
-	  val client = EchoModule.inject(classOf[EchoClient],Some("propertyStyle"))
+	  val client = EchoModule.inject [EchoClient] (Some("propertyStyle"))
 	  val result = client.callEcho("Hallooo")
 	  result should equal ("Hallooo Property Style")	  
   }  

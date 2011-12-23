@@ -9,8 +9,18 @@ trait InjectableEx extends Injectable {self =>
     } catch {
       case _ex: BindingException =>
         val clazz = m.erasure.asInstanceOf[Class[T]]
-        if (Modifier.isStatic(clazz.getModifiers)) {
-          if (clazz.isAssignableFrom(classOf[Injectable])) {
+        if (clazz.isMemberClass && !Modifier.isStatic(clazz.getModifiers)) {
+          if (classOf[Injectable].isAssignableFrom(clazz)) {
+            try {
+              clazz.getConstructor(self.getClass, classOf[BindingModule]).newInstance(self, bindingModule)
+            } catch {
+              case _ => clazz.getConstructor(self.getClass).newInstance(self)
+            }
+          } else {
+            clazz.getConstructor(self.getClass).newInstance(self)
+          }
+        } else {
+          if (classOf[Injectable].isAssignableFrom(clazz)) {
             try {
               clazz.getConstructor(classOf[BindingModule]).newInstance(bindingModule)
             } catch {
@@ -18,20 +28,6 @@ trait InjectableEx extends Injectable {self =>
             }
           } else {
             clazz.newInstance()
-          }
-        } else {
-          if (clazz.isAssignableFrom(classOf[Injectable])) {
-            try {
-              clazz.getConstructor(self.getClass, classOf[BindingModule]).newInstance(self, bindingModule)
-            } catch {
-              case _ => clazz.getConstructor(self.getClass).newInstance(self)
-            }
-          } else {
-            try {
-            clazz.getConstructor(self.getClass).newInstance(self)
-            } catch {
-              case _ => clazz.newInstance()
-            }
           }
         }
     }

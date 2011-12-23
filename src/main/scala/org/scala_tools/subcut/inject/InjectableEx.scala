@@ -9,7 +9,7 @@ trait InjectableEx extends Injectable {self =>
     } catch {
       case _ex: BindingException =>
         val clazz = m.erasure.asInstanceOf[Class[T]]
-        if (clazz.isMemberClass && !Modifier.isStatic(clazz.getModifiers)) {
+        if (clazz.isMemberClass && !Modifier.isStatic(clazz.getModifiers) && clazz.getEnclosingClass == self.getClass) {
           if (classOf[Injectable].isAssignableFrom(clazz)) {
             try {
               clazz.getConstructor(self.getClass, classOf[BindingModule]).newInstance(self, bindingModule)

@@ -136,6 +136,37 @@ trait Injectable {
   def injectIfBound[T <: Any](symbol: Symbol)(fn: => T)(implicit m: scala.reflect.Manifest[T]): T =
     injectIfBound(symbol.name)(fn)
 
+
+  /**
+   * Inject an optional instance for the given trait based on the class type required. If there is no binding, this
+   * method will return None. This form is for straight trait injection without an identifying name.
+   * @return an optional instance configured by the binding module to use for the given trait.
+   */
+  def injectOptional[T <: Any](implicit m: scala.reflect.Manifest[T]): Option[T] =
+    bindingModule.injectOptional[T](None)
+
+  /**
+   * Inject an optional instance for the given trait based on the class type required and an ID symbol. If there is no
+   * matching binding, this method will return None. The Symbol provided will be converted to a string
+   * prior to the lookup, so the symbol is interchangeable with the string version of the same ID, in other words
+   * 'maxPoolSize and "maxPoolSize" are considered equivalent by the lookup mechanism.
+   * @param symbol the identifying name to look up for the binding, e.g. 'maxPoolSize
+   * @return an optional instance configured by the binding module to use for the given trait and ID
+   */
+  def injectOptional[T <: Any](symbol: Symbol)(implicit m: scala.reflect.Manifest[T]): Option[T] =
+    bindingModule.injectOptional[T](Some(symbol.name))
+
+  /**
+   * Inject an optional instance for the given trait based on the class type required and an ID string. If there is no
+   * matching binding, this method will return None. The string ID is interchangeable with the
+   * symbol version of the same ID, in other words 'maxPoolSize and "maxPoolSize" are considered equivalent by the
+   * lookup mechanism.
+   * @param symbol the identifying name to look up for the binding, e.g. "maxPoolSize"
+   * @return an optional instance configured by the binding module to use for the given trait and ID
+   */
+  def injectOptional[T <: Any](name: String)(implicit m: scala.reflect.Manifest[T]): Option[T] =
+    bindingModule.injectOptional[T](Some(name))
+
 }
 
 /**

@@ -22,7 +22,7 @@ class InjectionTest extends FunSuite with ShouldMatchers with SeveredStackTraces
       val impl3 = inject[TestTrait]('testConfig)
 
       def stringThemAll(): List[String] =
-        List(impl1.someMethod(), impl2.someMethod(), impl3.someMethod)
+        List(impl1.someMethod(), impl2.someMethod(), impl3.someMethod())
     }
 
     val injected = new SomeInjectedStuff
@@ -36,7 +36,7 @@ class InjectionTest extends FunSuite with ShouldMatchers with SeveredStackTraces
       lazy val impl3 = inject[TestTrait]('testConfig)
 
       def stringThemAll(): List[String] =
-        List(impl1.someMethod(), impl2.someMethod(), impl3.someMethod)
+        List(impl1.someMethod(), impl2.someMethod(), impl3.someMethod())
     }
 
     val injected = new SomeAbstractInjectedStuff with BoundToTrial
@@ -73,10 +73,10 @@ object TrialBindingModule extends MutableBindingModule {
   bind [TestTrait] identifiedBy 'testConfig toProvider (new AlternativeImpl)
   bind [TestTrait] identifiedBy "something else" toProvider { new AlternativeImpl }
   println("Before fixed binding")
-  bind [TestTrait] identifiedBy 'fixed toSingleInstance { new AlternativeImpl2 }
+  bind [TestTrait] identifiedBy 'fixed toSingle { new AlternativeImpl2 }
   println("After fixed binding")
 
-  bind [AnotherTrait] toSingleInstance new AnotherTraitImpl
+  bind [AnotherTrait] toSingle new AnotherTraitImpl
   this.showMap()
 }
 

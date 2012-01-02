@@ -37,27 +37,27 @@ class ModuleCompositionAndMergingTest extends FunSuite with ShouldMatchers with 
 // let's make some modules to bind in
 
 object LarchModule extends NewBindingModule({ module =>
-  module.bind [Tree] toSingleInstance { new Larch }
+  module.bind [Tree] toSingle { new Larch }
 })
 
 object OakModule extends NewBindingModule({ module =>
-  module.bind [Tree] toSingleInstance { new Oak }
+  module.bind [Tree] toSingle { new Oak }
 })
 
 object LawnModule extends NewBindingModule({ module =>
-  module.bind [GroundCover] toSingleInstance { new Lawn }
+  module.bind [GroundCover] toSingle { new Lawn }
 })
 
 object PavedModule extends NewBindingModule({ module =>
-  module.bind [GroundCover] toSingleInstance { new Paved }
+  module.bind [GroundCover] toSingle { new Paved }
 })
 
 object SmallGardenModule extends NewBindingModule({ module =>
-  module.bind [GardenPlot] toSingleInstance { new SmallGardenPlot }
+  module.bind [GardenPlot] toSingle { new SmallGardenPlot }
 })
 
 object MediumGardenModule extends NewBindingModule({ module =>
-  module.bind [GardenPlot] toSingleInstance { new MediumGardenPlot }
+  module.bind [GardenPlot] toSingle { new MediumGardenPlot }
 })
 
 class Garden(implicit val bindingModule: BindingModule) extends Injectable {

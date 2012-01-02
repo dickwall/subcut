@@ -88,11 +88,11 @@ class PushBindingsTest extends FunSuite with ShouldMatchers with SeveredStackTra
 }
 
 object PushBindingsTestModule1 extends MutableBindingModule {
-  bind[BoundTrait1].toSingleInstance(new T1Impl1)
+  bind [BoundTrait1] toSingle new T1Impl1
 }
 
 object PushBindingsTestModule2 extends MutableBindingModule {
-  bind[BoundTrait2].toSingleInstance(new T2Impl1)
+  bind [BoundTrait2] toSingle new T2Impl1
 }
 
 object PushBindingsTestModule extends MutableBindingModule {

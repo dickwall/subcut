@@ -27,9 +27,11 @@ This is just one recipe that works, and is my recommendation. There are other wa
 2. Create a binding module using 
 
     ```scala
-    object SomeConfigurationModule extends NewBindingModule({ module =>
-      module.bind[X] toSingleInstance Y
-      module.bind[Z] toProvider { codeToGetInstanceOfZ() }
+    object SomeConfigurationModule extends NewBindingModule({ implicit module =>
+      import module._  // optional but convenient
+
+      bind [X] toSingle Y
+      bind [Z] toProvider { codeToGetInstanceOfZ() }
     })
     ```
 
@@ -41,12 +43,23 @@ This is just one recipe that works, and is my recommendation. There are other wa
         extends SomeTrait with Injectable {...}
     ```
 
+    You can also use the AutoInjectable trait with the subcut compiler plugin (the plugin must be on the
+    class path for the compiler) to avoid having to include the implicit val binding module definition, e.g:
+
+    ```scala
+    class SomeServiceOrClass(param1: String, param2: Int) extends SomeTrait with AutoInjectable {...}
+    ```
+
+    This will be expanded by the compiler plugin to be equivalent to the Injectable form above. If you forget
+    to include the compiler plugin on the classpath, you will see errors about a missing abstract bindingModule
+    field.
+
 4. Within the class where you want to inject bindings, use the following code 
    or similar, the function to the right side of the binding expression is used as default if there is no
    matching binding.
 
     ```scala
-      val service1 = injectIfBound[Service1] { new Service1Impl }
+      val service1 = injectOptional [Service1] getOrElse { new Service1Impl }
     ```
 
 5. For testing, create a obtain a modifiable binding from the normal immutable binding module and rebind
@@ -55,7 +68,7 @@ This is just one recipe that works, and is my recommendation. There are other wa
     ```scala
     test("Some test") {
        SomeConfigurationModule.modifyBindings { testModule =>
-         testModule.bind [SomeTrait] toSingleInstance new FakeSomeTrait
+         testModule.bind [SomeTrait] toSingle new FakeSomeTrait
          val testInstance = new SomeServiceOrClass(param1, param2)(testModule)
          // test stuff...
        }
@@ -73,13 +86,13 @@ For maven:
     <dependency>
       <groupId>org.scala-tools.subcut</groupId>
       <artifactId>subcut_2.9.1</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>1.0</version>
     </dependency>
 ```
 
 replace _2.9.1 with the version of Scala you are using.
-Replace 1.0-SNAPSHOT with whatever the latest stable version of subcut is (or skip -SNAPSHOT if you want a release).
-Snapshot and release builds are available from the scala-tools snapshot repo. Note that if you don't have the
+Replace 1.0 with whatever the latest stable version of subcut is (or add -SNAPSHOT if you want a snapshot).
+Snapshot and release builds are available from the scala-tools repo. Note that if you don't have the
 scala-tools repo in your list of maven repositories, see http://scala-tools.org for details on how to add
 it.
 
@@ -89,10 +102,10 @@ See the instructions for maven about versions and repo configuration. To use sub
 the dependency:
 
 ```scala
-    "org.scala-tools.subcut" %% "subcut" % "1.0-SNAPSHOT"
+    "org.scala-tools.subcut" %% "subcut" % "1.0"
 ```
 
-replacing 1.0-SNAPSHOT with the latest (or desired) version of subcut.
+replacing 1.0 with the latest (or desired) version of subcut.
 
 
 ## Setting up a configuration module
@@ -105,11 +118,12 @@ To create a new immutable binding module:
 ```scala
     object ProjectConfiguration extends NewBindingModule({ module =>
       import module._   // can now use bind directly
-      bind [Database] toSingleInstance new MySQLDatabase
-      bind [Analyzer] identifiedBy 'webAnalyzer to instanceOfClass [WebAnalyzer]
-      bind [Session] identifiedBy 'currentUser toProvider { WebServerSession.getCurrentUser().getSession() }
-      bind [Int] identifiedBy 'maxThreadPoolSize toSingleInstance 10
-      bind [WebSearch] toSingleInstance { new GoogleSearchService()(ProjectConfiguration) }
+      
+      bind [Database] toSingle new MySQLDatabase
+      bind [Analyzer] idBy 'webAnalyzer to instanceOfClass [WebAnalyzer]
+      bind [Session] idBy 'currentUser toProvider { WebServerSession.getCurrentUser().getSession() }
+      bind [Int] idBy 'maxThreadPoolSize toSingle 10
+      bind [WebSearch] toSingle { new GoogleSearchService()(ProjectConfiguration) }
     })
 ```
 
@@ -134,7 +148,7 @@ you can bind common types like Int and String without an identifying name, doing
 since the resulting binding will be very broad and could be picked up accidentally.
 
 The final binding, trait WebSearch is bound lazily to a single instance obtained by the provided method.
-There are a couple of things to note about this binding. The toSingleInstance will defer the instance from
+There are a couple of things to note about this binding. The toSingle will defer the instance from
 being created until the first time it is bound, but after that the same instance will always be returned
 for that binding. The lazy binding is necessary in this case for the second reason - a specific binding
 configuration is provided to the GoogleSearchService constructor in the form of a second curried
@@ -148,6 +162,20 @@ Note also that the binding module defined here is a singleton object. There is t
 it keeps things nice and simple. Define it in some package in your project that denotes configuration,
 and makes it easy to find.
 
+You can also optionally make the module loaned to the definition implicit itself, e.g:
+
+
+```scala
+    object ProjectConfiguration extends NewBindingModule({ implicit module =>
+      import module._   // can now use bind directly
+
+      // ...
+```
+
+The implicit before the module parameter makes module implicitly available for other classes that may need
+injection without having to have a separate implicit or explicit module definition. It's just a shortcut for
+convenience.
+
 
 ## Creating an Injectable Class
 
@@ -155,10 +183,10 @@ To use these bindings in your class, the recommended way is to do as follows:
 
 ```scala
     class DoStuffOnTheWeb(val siteName: String, val date: Date)(implicit val bindingModule: BindingModule) extends Injectable {
-      val webSearch = injectIfBound[WebSearch] { new BingSearchService }
-      val maxPoolSize = injectIfBound[Int]('maxThreadPoolSize) { 15 }
-      val flightLookup = injectIfBound[FlightLookup] { new OrbitzFlightLookup }
-      val session = injectIfBound[Session]('currentUser) { Session.getCurrent() }
+      val webSearch = injectOptional [WebSearch] getOrElse { new BingSearchService }
+      val maxPoolSize = injectOptional [Int]('maxThreadPoolSize) getOrElse { 15 }
+      val flightLookup = injectOptional [FlightLookup] getOrElse { new OrbitzFlightLookup }
+      val session = injectOptional [Session]('currentUser) getOrElse { Session.getCurrent() }
 
       def doSomethingCool(searchString: String): String = {
         val webSearch = webSearch.search(searchString)
@@ -193,12 +221,12 @@ Some things to note about the definition:
 * The Injectable trait must appear in the traits for the injectable class somewhere. This defines all
   of the injection methods like injectIfBound.
 
-* The injectIfBound[Trait] vals defined at the top of the class are where the configuration bindings are
-  used. injectIfBound will use the configured definition if one is provided, and if not, it will fall
+* The injectOptional [Trait] vals defined at the top of the class are where the configuration bindings are
+  used. injectOptional will use the configured definition if one is provided, and if not, the getOrElse will fall
   back to the provided default on the right hand side of the expression, so for example, in the line:
 
 ```scala
-    val session = injectIfBound[Session]('currentUser) { Session.getCurrent() }
+    val session = injectOptional [Session]('currentUser) getOrElse { Session.getCurrent() }
 ```
 
   subcut will look to see if there is a definition bound to trait Session with id 'currentUser, and if so
@@ -206,11 +234,11 @@ Some things to note about the definition:
   However, for the line:
 
 ```scala
-    val flightLookup = injectIfBound[FlightLookup] { new OrbitzFlightLookup }
+    val flightLookup = injectOptional [FlightLookup] getOrElse { new OrbitzFlightLookup }
 ```
 
   subcut looks for the trait FlightLookup (with no extra ID name to identify it) and doesn't find one
-  bound, so instead falls back to the default expresion to the right, which is evaluated and results in a
+  bound, so instead falls back to the default expresion in the getOrElse, which is evaluated and results in a
   new instance of OrbitzFlightLookup every time a new instance of our class is created.
   OrbitzFlightLookup can itself be an injected class, and because the implicit parameter for bindings is
   in scope, the compiler will apply those bindings to it automatically for us, so OrbitzFlightLookup
@@ -222,23 +250,24 @@ Some things to note about the definition:
 
   Note that OrbitzFlightLookup must mix in the FlightLookupTrait in order to satisfy the binding, and
   must still include the implicit parameter list even though it doesn't have any constructor parameters.
+  If you want to avoid adding the implicit parameter everywhere, see AutoInjectable below.
 
 * The rest of the class can use these injected values as normal through the methods defined on the traits
   they are defined under. You can also inject values at any point in the class, not just in the
   constructor code, and any new Injectable instances you create at any point in the class will get the
   binding configuration passed into them automatically unless you explicitly override them.
 
-injectIfBound is only one form of injection subcut provides, the others being inject[Trait] which will
+injectOptional is only one form of injection subcut provides, the others being inject [Trait] which will
 always inject the trait from the bindingModule definition, and will fail if no such binding is provided.
-The other form is injectIfMissing[Trait] where the instance is only bound in if it has not already been
+The other form is injectIfMissing [Trait] where the instance is only bound in if it has not already been
 provided in a constructor parameter (see the scaladoc for more information on how to use this). Both of
-these other types of injection will fail if no binding has been provided, while injectIfBound will always
+these other types of injection will fail if no binding has been provided, while injectOptional will always
 fall back on the default if no binding is available. This is one of the reasons it is the recommended way
 to use subcut, since you reduce the possibility of runtime binding failure. Another reason is that
 programmers reading your code can easily see what the "normal" implementation of a specific trait is,
 right there in the class definition.
 
-Using injectIfBound also makes it possible for you to have a completely empty BindingModule for
+Using injectOptional also makes it possible for you to have a completely empty BindingModule for
 production, in fact I often do. You must provide the binding module still, so that it may be overridden
 for testing or other purposes, but leaving the BindingModule empty means that the defaults will always be
 used, and also carries a slight performance advantage if you do so, since if the bindingModule is empty,
@@ -304,7 +333,42 @@ provided. Thus the compiler will help you make sure the chain is intact as far a
 To correct the problem, simply add the implicit val bindingModule: BindingModule to a curried constructor
 parameter in Class B. You don't even need to make B injectable if you don't need it to be, just so long
 as the implicit is carried through. This will keep the implicit chain intact through to class C, and
-class D doesn't need either.
+class D doesn't need either. The other alternative is to mix in AutoInjectable to all the classes, as this
+will add the implicit parameter automatically through the compiler plugin.
+
+
+## AutoInjectable and the Compiler Plugin
+
+For convenience, subcut includes a compiler plugin which can be used to avoid needing to add the
+(implicit val bindingModule: BindingModule) curried parameter list in new class definitions. To use it, you
+need to do the following:
+
+* Include the compiler plugin on the classpath for the compiler:
+
+  In sbt, use
+
+```scala
+  addCompilerPlugin("org.scala-tools.subcut" %% "subcut" % "1.0")
+```
+  in the project build settings. In your IDE or other build environment, use the recommended method there
+  to add the compiler plugin.
+
+* Use the AutoInjectable trait instead of Injectable and skip the implicit val bindingModule parameter:
+
+```scala
+  class DoStuffOnTheWeb(val siteName: String, val date: Date) extends AutoInjectable {
+    // ...
+  }
+```
+
+When the compiler plugin sees the AutoInjectable trait on a class definition, it will automatically add
+the implicit parameter before continuing with compilation. If you see errors about AutoInjectable classes
+not having a bindingModule defined, it indicates that the compiler plugin is not on the compile time classpath
+correctly so check your settings.
+
+Use of the compiler plugin for subcut is completely optional. The code generated is identical to using Injectable
+with the implicit parameter for bindingModule added manually, so if you prefer not to use compiler plugins, just
+stick to Injectable and the implicit parameter.
 
 
 ## Integrating with other libraries
@@ -317,11 +381,11 @@ The traditional problem is that if you don't control the new instance, how do yo
 binding configuration to the top level instance created by the library. Normally the library needs some
 kind of integration plugin to help provide the right configuration.
 
-In subcut there is an easier way, simply create a new subclass of the Injectable class, and provide a
-definition for the bindingModule that is implicit in the constructor of that subClass, e.g.
+In subcut there is an easier way, simply create a new subclass of the Injectable (or AutoInjectable) class,
+and provide a definition for the bindingModule that is implicit in the constructor of that subClass, e.g.
 
 ```scala
-    class SomePage(implicit val bindingModule: BindingModule) extends WicketPage with Injectable { }
+    class SomePage extends WicketPage with AutoInjectable { }
 
     class ProdSomePage extends SomePage(ProjectConfiguration)
 ```

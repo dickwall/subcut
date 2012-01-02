@@ -119,10 +119,11 @@ trait BindingModule { outer =>
  * <p/>
  * <pre>
  * class ProductionBindings extends NewBindingModule({ implicit module =>
- *    module.bind[DBLookup] toSingleInstance new MySQLLookup
- *    module.bind[WebService].toClass[RealWebService]
- *    module.bind[Int] identifiedBy 'maxPoolSize toSingleInstance 10
- *    module.bind[QueryService] toSingleInstance { new SlowInitQueryService }
+ *    import module._   // for convenience
+ *    bind [DBLookup] toSingle new MySQLLookup
+ *    bind [WebService].toClass[RealWebService]
+ *    bind [Int] identifiedBy 'maxPoolSize toSingle 10   // could also use idBy instead of identifiedBy
+ *    bind [QueryService] toSingle { new SlowInitQueryService }
  * })
  * </pre>
  * @param fn a function that takes a mutable binding module and initializes it with whatever bindings
@@ -153,12 +154,13 @@ class NewBindingModule(fn: MutableBindingModule => Unit) extends BindingModule {
  * An example usage will look like this:
  * <pre>
  * class SomeBindings extends NewBindingModule ({ implicit module =>
- *   module.bind[Trait1] toSingleInstance new Class1Impl
+ *   import module._
+ *   bind [Trait1] toSingle new Class1Impl
  * })
  *
  * // in a test...
  * SomeBindings.modifyBindings { testBindings =>  // holds mutable copy of SomeBindings
- *   module.bind[Trait1] toSingleInstance mockClass1Impl  // where the mock has been set up already
+ *   module.bind[Trait1] toSingle mockClass1Impl  // where the mock has been set up already
  *   // run tests using the mockClass1Impl
  * }  // coming out of scope destroys the temporary mutable binding module
  * </pre>
@@ -230,7 +232,7 @@ trait MutableBindingModule extends BindingModule { outer =>
    * class SomeBindings extends NewBindingModule ({ module =>
    *   module <~ OtherModule1   // include all bindings from Module1
    *   module <~ OtherModule2   // include all bindings from Module2, overwriting as necessary
-   *   module.bind[Trait1] toSingleInstance new Class1Impl
+   *   module.bind[Trait1] toSingle new Class1Impl
    * })
    * </pre>
    */
@@ -390,7 +392,7 @@ trait MutableBindingModule extends BindingModule { outer =>
      * @param function a by-name function that is evaluated on the first injection of this binding, and after that
      * will always return the same instance I, where I is any subtype of T.
      */
-    def toSingleInstance[I <: T](function: => I) = {
+    def toSingle[I <: T](function: => I) = {
       name match {
         case Some(n) => outer.bindLazyInstance[T](n, function _)
         case None => outer.bindLazyInstance[T](function _)
@@ -398,8 +400,13 @@ trait MutableBindingModule extends BindingModule { outer =>
     }
 
     /**
+     * Synonym for #toSingle, provided for consistency
+     */
+    def toSingleInstance[I <: T](function: => I) = toSingle[I](function)
+
+    /**
      * A convenient operator to bind to an instance of None (in this definition). Can be used instead of
-     * unbind. For example <code>module.bind[Int] identified by 'timeLimit to None</code>
+     * unbind. For example <code>module.bind [Int] idBy 'timeLimit to None</code>
      * @param must be None (for this form of the method).
      */
     def to(none: None.type) = {
@@ -412,13 +419,13 @@ trait MutableBindingModule extends BindingModule { outer =>
 
     /**
      * Bind to a class instance provider of class. Intended to be used with instanceOfClass like this:
-     * <code>module.bind[DBLookup] to instanceOfClass[MySQLDBLookup]</code>. Will provide a new
+     * <code>module.bind [DBLookup] to instanceOfClass [MySQLDBLookup]</code>. Will provide a new
      * instance of the class configured for each injection site. Any instance provided in this way
      * must provide a zero parameter default constructor since reflection is used to create the instance
      * and it will fail if there is no default constructor. Note that this is true even for implicit
      * parameters, so you cannot use this form if you wish to provide the implicit binding chain to the
      * target instance. Use a toProvider instead.
-     * @param instOfClass the class instance provder to use for the binding. Use instanceOfClass method
+     * @param instOfClass the class instance provider to use for the binding. Use instanceOfClass method
      * to conveniently obtain the right thing.
      */
     def to(instOfClass: ClassInstanceProvider[T]) = {
@@ -463,7 +470,7 @@ trait MutableBindingModule extends BindingModule { outer =>
      * interchangeable, i.e. 'maxPoolSize and "maxPoolSize" are equivalent both in definition and in usage.
      * <p/>
      * Typical usage:
-     * <code>module.bind[Int] identifiedBy "maxPoolSize" toSingleInstance 30</code>
+     * <code>module.bind [Int] identifiedBy "maxPoolSize" toSingle 30</code>
      * @param n the string name to identify this binding when used in combination with the type parameter.
      */
     def identifiedBy(n: String) = {
@@ -478,13 +485,16 @@ trait MutableBindingModule extends BindingModule { outer =>
      * interchangeable, i.e. 'maxPoolSize and "maxPoolSize" are equivalent both in definition and in usage.
      * <p/>
      * Typical usage:
-     * <code>module.bind[Int] identifiedBy 'maxPoolSize toSingleInstance 30</code>
+     * <code>module.bind [Int] identifiedBy 'maxPoolSize toSingle 30</code>
      * @param symbol the symbol name to identify this binding when used in combination with the type parameter.
      */
     def identifiedBy(symbol: Symbol) = {
       this.name = Some(symbol.name)
       this
     }
+
+    def idBy(symbol: Symbol) = identifiedBy(symbol)
+    def idBy(name: String) = identifiedBy(name)
   }
 
   // and a parameterized bind method to kick it all off

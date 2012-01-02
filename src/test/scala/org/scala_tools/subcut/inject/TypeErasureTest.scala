@@ -24,8 +24,8 @@ class TypeErasureTest extends FunSuite with ShouldMatchers with SeveredStackTrac
 
 object TypeErasureModule extends NewBindingModule({ module =>
   import module._
-  bind [List[Int]] toSingleInstance List(1, 2, 3)
-  bind [List[String]] toSingleInstance List("a", "b", "c")
-  bind [List[List[Int]]] identifiedBy 'foo toSingleInstance List(List(1, 2, 3))
-  bind [List[List[String]]] identifiedBy 'foo toSingleInstance List(List("a", "b", "c"))
+  bind [List[Int]] toSingle List(1, 2, 3)
+  bind [List[String]] toSingle List("a", "b", "c")
+  bind [List[List[Int]]] identifiedBy 'foo toSingle List(List(1, 2, 3))
+  bind [List[List[String]]] identifiedBy 'foo toSingle List(List("a", "b", "c"))
 })

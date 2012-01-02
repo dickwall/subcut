@@ -15,7 +15,8 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class ImplicitBindingTest extends FunSuite with ShouldMatchers with SeveredStackTraces {
   test("Implicit binding 1") {
-    implicit val bm: BindingModule = ImplicitModule1 // binding module implicit in scope
+    implicit val bm: BindingModule = ImplicitModule1
+    // binding module implicit in scope
     // now create the new instance and use it
     val tryIt = new TryIt(10)
     val (str, num) = tryIt.doItUsingInjected
@@ -58,11 +59,11 @@ class Impl1b extends DoIt1 {
 }
 
 object ImplicitModule1 extends MutableBindingModule {
-  bind [DoIt1] toSingleInstance (new Impl1a)
+  bind [DoIt1] toSingle (new Impl1a)
 }
 
 object ImplicitModule2 extends MutableBindingModule {
-  bind [DoIt1] toSingleInstance (new Impl1b)
+  bind [DoIt1] toSingle (new Impl1b)
 }
 
 trait ImplicitBinding {

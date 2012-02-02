@@ -49,7 +49,7 @@ object ConfigValueModule extends NewBindingModule ({implicit module =>
 })
 
 class ConfigValueInstance(implicit val bindingModule: BindingModule) extends Injectable {
-  val poolSize = injectOptional [Int] ("poolSize") getOrElse 30
+  val poolSize = injectOptional [Int] ('poolSize) getOrElse 30
   val minPoolSize = injectOptional [Int] ("minPoolSize") getOrElse 10
   val threshold = inject[Double]('threshold)
   val theInt = inject[Int]

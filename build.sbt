@@ -2,7 +2,7 @@ name := "subcut"
 
 organization := "org.scala-tools.subcut"
 
-version := "1.0"
+version := "1.1-SNAPSHOT"
 
 crossScalaVersions := Seq("2.9.1", "2.9.0-1", "2.9.0")
 

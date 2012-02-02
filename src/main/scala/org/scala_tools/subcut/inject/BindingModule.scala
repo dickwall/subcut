@@ -333,11 +333,26 @@ trait MutableBindingModule extends BindingModule { outer =>
     println(mapString.mkString("\n"))
   }
 
+  def showDeepBindings() {
+    println(deepMapString.mkString("\n"))
+  }
+
   /**
    * A convenient way to obtain a string representation of the current bindings in this module.
    */
   def mapString = {
     for ((k, v) <- bindings) yield { k.toString + " -> " + v.toString }
+  }
+
+  def deepMapString = {
+    def getDeep(x: Any): String = x match {
+      case ip: ClassInstanceProvider[_] => "Class: " + ip.newInstance().toString
+      case lip: LazyInstanceProvider[_] => "Lazy: " + lip.instance.toString
+      case nip: NewInstanceProvider[_] => "New: " + nip.instance.toString
+      case i => "Just: " + i.toString
+    }
+
+    for ((k, v) <- bindings) yield { k.toString + " -> " + getDeep(v) }
   }
 
   /**

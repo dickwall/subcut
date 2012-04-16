@@ -167,6 +167,10 @@ trait Injectable {
   def injectOptional[T <: Any](name: String)(implicit m: scala.reflect.Manifest[T]): Option[T] =
     bindingModule.injectOptional[T](Some(name))
 
+  object Inject { 
+    def unapply[T <: Any](implicit m: scala.reflect.Manifest[T]): Option[T] =
+      Some(inject[T]/*(m)*/)
+  }
 }
 
 /**

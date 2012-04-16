@@ -24,6 +24,13 @@ class PlainScalaInjectInBindingTest extends FunSuite with ShouldMatchers {
 	  val result = client.callEcho("Hallooo")
 	  result should equal ("Hallooo Property Style")	  
   }  
+
+  test("inject using extractor") {
+    import EchoModule._
+	  val Inject(service) = manifest[EchoService]
+	  val result = service.echo("test")
+	  result should equal ("test")
+  }  
   
   
   class EchoService {

@@ -4,13 +4,15 @@ organization := "org.scala-tools.subcut"
 
 version := "1.1-SNAPSHOT"
 
-crossScalaVersions := Seq("2.9.1", "2.9.0-1", "2.9.0")
+crossScalaVersions := Seq("2.10.0-M3","2.9.2", "2.9.1-1", "2.9.1","2.9.0-1","2.9.0")
 
-scalaVersion := "2.9.1"
+scalaVersion := "2.10.0-M3"
 
 scalacOptions += "-deprecation"
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "1.6.1" % "test"
+resolvers += ScalaToolsSnapshots
+
+libraryDependencies += "org.scalatest" %% "scalatest" % "1.8-SNAPSHOT" % "test"
 
 libraryDependencies += "junit" % "junit" % "4.5" % "test"
 

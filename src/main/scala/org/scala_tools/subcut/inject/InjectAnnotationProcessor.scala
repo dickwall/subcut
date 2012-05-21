@@ -31,8 +31,8 @@ class AnnotationsInjectPlugin(val global: Global) extends Plugin {
 
     def newTransformer(unit: CompilationUnit) = new AnnotationsInjectTransformer (unit)
 
-    val autoInjectable = "AutoInjectable"
-    val bindingModule = "bindingModule"
+    val autoInjectable = newTermName("AutoInjectable")
+    val bindingModule = newTermName("bindingModule")
     val constructorMethod = "<init>"
 
     val bindingModuleType =

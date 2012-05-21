@@ -10,7 +10,9 @@ scalaVersion := "2.10.0-M3"
 
 scalacOptions += "-deprecation"
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "1.6.1" % "test"
+resolvers += ScalaToolsSnapshots
+
+libraryDependencies += "org.scalatest" %% "scalatest" % "1.8-SNAPSHOT" % "test"
 
 libraryDependencies += "junit" % "junit" % "4.5" % "test"
 

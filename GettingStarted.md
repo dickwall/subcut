@@ -27,6 +27,7 @@ This is just one recipe that works, and is my recommendation. There are other wa
 2. Create a binding module using 
 
     ```scala
+
     object SomeConfigurationModule extends NewBindingModule({ implicit module =>
       import module._  // optional but convenient
 
@@ -39,6 +40,7 @@ This is just one recipe that works, and is my recommendation. There are other wa
    to the class declaration: an (implicit val bindingModule: BindingModule) and trait Injectable, e.g:
    
     ```scala
+    
     class SomeServiceOrClass(param1: String, param2: Int)(implicit val bindingModule: BindingModule)
         extends SomeTrait with Injectable {...}
     ```

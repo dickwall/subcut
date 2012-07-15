@@ -4,6 +4,7 @@ import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.{FunSuite, SeveredStackTraces}
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
+import io.Source
 
 /**
  * Created by IntelliJ IDEA.
@@ -32,9 +33,44 @@ class ModuleCompositionAndMergingTest extends FunSuite with ShouldMatchers with 
       val mutable = SmallGardenModule.asInstanceOf[MutableBindingModule]
     }
   }
+
+  test("Merging configuration strings over existing") {
+    val fromProperties = new FromProperties
+    implicit val configuration = fromProperties ~ StandardConfiguration
+    configuration.modifyBindings { mod =>
+      mod.showDeepBindings()
+    }
+
+    println("----")
+
+    implicit val orig = StandardConfiguration ~ fromProperties
+    orig.modifyBindings { mod =>
+      mod.showDeepBindings()
+    }
+
+  }
 }
 
 // let's make some modules to bind in
+
+object StandardConfiguration extends NewBindingModule({ module =>
+  import module._
+  bind [String] idBy 'wsUrl toSingle "http://main.service.com/main/web/service"
+  bind [String] idBy 'database toSingle "mysql:localhost:3306/main"
+  bind [String] idBy 'version toSingle "1.3"
+})
+
+class FromProperties extends BindingModule {
+  val bindings = {
+    val newMod = new NewBindingModule({ module =>
+      import module._
+      bind [String] idBy 'wsUrl toSingle "http://alt.service.com/alternative/web/service"
+      bind [String] idBy 'database toSingle "mysql:remote-host:3306/main"
+      bind [String] idBy 'grue toSingle "You have been eaten"
+    })
+    newMod.bindings
+  }
+}
 
 object LarchModule extends NewBindingModule({ module =>
   module.bind [Tree] toSingle { new Larch }

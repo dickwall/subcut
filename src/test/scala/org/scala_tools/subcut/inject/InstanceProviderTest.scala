@@ -34,8 +34,10 @@ class InstanceProviderTest extends FunSuite with ShouldMatchers {
 
   test("ClassInstanceProvider should provide a new instance each time instance method is called") {             
     val p = new ClassInstanceProvider[ClassInstanceProviderVerifier](classOf[ClassInstanceProviderVerifier].asInstanceOf[Class[Any]])
-    val ia = p.newInstance[ClassInstanceProviderVerifier]
-    val ib = p.newInstance [ClassInstanceProviderVerifier]
+    import NewBindingModule.newBindingModule
+    val bindingModule = newBindingModule { module => }
+    val ia = p.newInstance[ClassInstanceProviderVerifier](bindingModule)
+    val ib = p.newInstance[ClassInstanceProviderVerifier](bindingModule)
     ia.count should be < (ib.count)
   } 
 

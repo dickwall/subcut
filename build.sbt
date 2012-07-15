@@ -2,15 +2,15 @@ name := "subcut"
 
 organization := "org.scala-tools.subcut"
 
-version := "1.1-SNAPSHOT"
+version := "2.0-SNAPSHOT"
 
-crossScalaVersions := Seq("2.9.1", "2.9.0-1", "2.9.0")
+crossScalaVersions := Seq("2.9.2", "2.9.1", "2.9.0-1", "2.9.0")
 
-scalaVersion := "2.9.1"
+scalaVersion := "2.9.2"
 
 scalacOptions += "-deprecation"
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "1.6.1" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "1.8" % "test"
 
 libraryDependencies += "junit" % "junit" % "4.5" % "test"
 

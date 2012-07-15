@@ -38,7 +38,7 @@ class PushBindingsTest extends FunSuite with ShouldMatchers with SeveredStackTra
 
     // now push some new bindings in
     PushBindingsTestModule.pushBindings {
-      PushBindingsTestModule.bind[BoundTrait1].toClass[T1Impl2]
+      PushBindingsTestModule.bind [BoundTrait1] to newInstanceOf [T1Impl2]
 
       val tc2 = new SomeTestClass
       // new instance should have the new bindings for T1 but not for T2
@@ -57,7 +57,7 @@ class PushBindingsTest extends FunSuite with ShouldMatchers with SeveredStackTra
 
     // now push some new bindings in
     PushBindingsTestModule.pushBindings {
-      PushBindingsTestModule.bind[BoundTrait2].toClass[T2Impl2]
+      PushBindingsTestModule.bind[BoundTrait2] to newInstanceOf [T2Impl2]
 
       val tc2 = new SomeTestClass
       // new instance should have the new bindings for T2 but not for T1
@@ -65,8 +65,8 @@ class PushBindingsTest extends FunSuite with ShouldMatchers with SeveredStackTra
 
       // now push in another implementation of T2, and T1 as well
       PushBindingsTestModule.pushBindings {
-        PushBindingsTestModule.bind[BoundTrait1].toClass[T1Impl3]
-        PushBindingsTestModule.bind[BoundTrait2].toClass[T2Impl3]
+        PushBindingsTestModule.bind [BoundTrait1] to newInstanceOf [T1Impl3]
+        PushBindingsTestModule.bind [BoundTrait2] to newInstanceOf [T2Impl3]
 
         val tc3 = new SomeTestClass
         // new instance should have impl3 bindings for both traits

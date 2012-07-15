@@ -4,6 +4,7 @@ import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.{SeveredStackTraces, FunSuite}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
+import NewBindingModule._
 
 /**
  * Created by IntelliJ IDEA.
@@ -15,7 +16,9 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class ImplicitBindingTest extends FunSuite with ShouldMatchers with SeveredStackTraces {
   test("Implicit binding 1") {
-    implicit val bm: BindingModule = ImplicitModule1
+    implicit val bm = newBindingModule { implicit module =>
+      module.bind [DoIt1] toSingle (new Impl1a)
+    }
     // binding module implicit in scope
     // now create the new instance and use it
     val tryIt = new TryIt(10)
@@ -25,7 +28,9 @@ class ImplicitBindingTest extends FunSuite with ShouldMatchers with SeveredStack
   }
 
   test("Implicit binding 2") {
-    implicit val bm: BindingModule = ImplicitModule2 // binding module implicit in scope
+    implicit val bm = newBindingModule { module =>
+      module.bind [DoIt1] toSingle (new Impl1b)
+    }
     // now create the new instance and use it
     val tryIt = new TryIt(12)
     val (str, num) = tryIt.doItUsingInjected
@@ -34,8 +39,13 @@ class ImplicitBindingTest extends FunSuite with ShouldMatchers with SeveredStack
   }
 
   test("Explicit binding 1") {
-    implicit val bm: BindingModule = ImplicitModule2 // binding module implicit should not be used
-    val tryIt = new TryIt(12)(ImplicitModule1)  // instead, this explicit should be used
+    implicit val bm = newBindingModule { module =>
+      module.bind [DoIt1] toSingle (new Impl1b)
+    }
+    val explicitModule = newBindingModule { implicit module =>
+      module.bind [DoIt1] toSingle (new Impl1a)
+    }
+    val tryIt = new TryIt(12)(explicitModule)  // instead, this explicit should be used
     val (str, num) = tryIt.doItUsingInjected
     num should be (12) // and the explicit should propagate through, not the implicit module 2
     str should be ("Impl1a")
@@ -56,14 +66,6 @@ class Impl1a extends DoIt1 {
 class Impl1b extends DoIt1 {
   def doIt1() = "Impl1b"
   def doIt2(x: Int) = x * x
-}
-
-object ImplicitModule1 extends MutableBindingModule {
-  bind [DoIt1] toSingle (new Impl1a)
-}
-
-object ImplicitModule2 extends MutableBindingModule {
-  bind [DoIt1] toSingle (new Impl1b)
 }
 
 trait ImplicitBinding {

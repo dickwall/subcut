@@ -32,7 +32,10 @@ trait BindingModule { outer =>
    */
   def ~(other: BindingModule): BindingModule = {
     new BindingModule {
-      override val bindings = other.bindings ++ outer.bindings
+      override val bindings = (other.bindings ++ outer.bindings) mapValues {
+        case lmip: LazyModuleInstanceProvider[_] => lmip.copyAndReset(this)
+        case other => other
+      }
     }
   }
 
@@ -70,7 +73,6 @@ trait BindingModule { outer =>
    * binding is available with the given class and optional name, a None will be returned,
    * otherwise the binding will be evaluated and an instance of a subclass of T will be
    * returned.
-   * @param clazz the class to match a binding for
    * @param name Option[String] name, if present will be matched, if None only class will
    * be used for lookup (note, this also means any named bindings of the same type will
    * not be matched)
@@ -97,15 +99,25 @@ trait BindingModule { outer =>
       val bindingOption = bindings.get(key)
       if (bindingOption == None) None
       else
-        bindingOption.get match {
-          case ip: ClassInstanceProvider[T] => Some(ip.newInstance())
-          case lip: LazyInstanceProvider[T] => Some(lip.instance)
-          case nip: NewInstanceProvider[T] => Some(nip.instance)
-          case i: T => Some(i)
-          case _ => throw new BindingException("Illegal binding for key " + key)
-        }
+        (bindingOption.get match {
+          case ip: ClassInstanceProvider[_] => Some(ip.newInstance(this))
+          case lip: LazyInstanceProvider[_] => Some(lip.instance)
+          case lmip: LazyModuleInstanceProvider[_] => Some(lmip.instance)
+          case nip: NewInstanceProvider[_] => Some(nip.instance)
+          case nbip: NewBoundInstanceProvider[_] => Some(nbip.instance(this))
+          case i => Some(i)
+        }).asInstanceOf[Option[T]]
     }
   }
+
+  /**
+   * A convenient way to obtain a string representation of the current bindings in this module.
+   * Useful for debugging.
+   */
+  def listBindings: Iterable[String] = {
+    for ((k, v) <- bindings) yield { k.toString + " -> " + v.toString }
+  }
+
 }
 
 /**
@@ -139,6 +151,25 @@ class NewBindingModule(fn: MutableBindingModule => Unit) extends BindingModule {
 }
 
 /**
+ * A companion object holding a convenience method to create new binding modules on the fly when passed
+ * a function from MutableBindingModule to unit.
+ * <p/>
+ * to use this class:
+ * <pre>
+ * import NewBindingModule._
+ * implicit val bindingModule = newBindingModule { implicit module =>
+ *    bind [DBLookup] toSingle new MySQLLookup
+ *    bind [WebService].toClass[RealWebService]
+ *    bind [Int] identifiedBy 'maxPoolSize toSingle 10   // could also use idBy instead of identifiedBy
+ *    bind [QueryService] toSingle { new SlowInitQueryService }
+ * }
+ * </pre>
+ */
+object NewBindingModule {
+  def newBindingModule(fn: MutableBindingModule => Unit): BindingModule = new NewBindingModule(fn)
+}
+
+/**
  * A mutable binding module. This module is used during construction of bindings configuration
  * with the DSL, but may also be used as a mutable binding module in its own right. Anyone wishing
  * to use the mutable binding module to inject a real system should be aware that they take on all
@@ -153,14 +184,14 @@ class NewBindingModule(fn: MutableBindingModule => Unit) extends BindingModule {
  * <p/>
  * An example usage will look like this:
  * <pre>
- * class SomeBindings extends NewBindingModule ({ implicit module =>
+ * class SomeBindings extends NewBindingModule ( implicit module => {
  *   import module._
  *   bind [Trait1] toSingle new Class1Impl
  * })
  *
  * // in a test...
  * SomeBindings.modifyBindings { testBindings =>  // holds mutable copy of SomeBindings
- *   module.bind[Trait1] toSingle mockClass1Impl  // where the mock has been set up already
+ *   testBindings.bind[Trait1] toSingle mockClass1Impl  // where the mock has been set up already
  *   // run tests using the mockClass1Impl
  * }  // coming out of scope destroys the temporary mutable binding module
  * </pre>
@@ -187,7 +218,7 @@ trait MutableBindingModule extends BindingModule { outer =>
    * this module.
    * @return a new immutable BindingModule
    */
-  def fixed(): BindingModule = {
+  def fixed: BindingModule = {
     new BindingModule {
       override val bindings = outer._bindings
     }
@@ -201,7 +232,10 @@ trait MutableBindingModule extends BindingModule { outer =>
    * there may be times this approach is preferable. Calling freeze() on a mutable
    * binding module cannot be reversed.
    */
-  def freeze() = { this._frozen = true; this }
+  def freeze() = {
+    this._frozen = true
+    this
+  }
 
   /**
    * return whether the current state of these bindings is frozen.
@@ -222,7 +256,11 @@ trait MutableBindingModule extends BindingModule { outer =>
    * @param other A BindingModules with bindings to merge and/or replace the bindings in this module.
    */
   def mergeWithReplace(other: BindingModule) = {
-    this.bindings = this.bindings ++ other.bindings
+    val resetMap = other.bindings.mapValues {
+      case lmip: LazyModuleInstanceProvider[_] => lmip.copyAndReset(this)
+      case other => other
+    }
+    this.bindings = this.bindings ++ resetMap
   }
 
   /**
@@ -258,7 +296,7 @@ trait MutableBindingModule extends BindingModule { outer =>
     for (module <- modules) mergeWithReplace(module)
   }
   
-  private def bindInstance[T <: Any](instance: T)(implicit m: scala.reflect.Manifest[T]) {
+  private def bindEagerInstance[T <: Any](instance: T)(implicit m: scala.reflect.Manifest[T]) {
     val key = bindingKey(m, None)
     bindings += key -> instance
   }
@@ -268,12 +306,22 @@ trait MutableBindingModule extends BindingModule { outer =>
     bindings += key -> new LazyInstanceProvider(func)
   }
 
+  private def bindLazyModuleInstance[T <: Any](func: BindingModule => T)(implicit m: scala.reflect.Manifest[T]) {
+    val key = bindingKey(m, None)
+    bindings += key -> new LazyModuleInstanceProvider(this, func)
+  }
+
   private def bindProvider[T <: Any](func: () => T)(implicit m: scala.reflect.Manifest[T]) {
     val key = bindingKey(m, None)
     bindings += key -> new NewInstanceProvider(func)
   }
 
-  private def bindInstance[T <: Any](name: String, instance: T)(implicit m: scala.reflect.Manifest[T]) {
+  private def bindProvider[T <: Any](func: BindingModule => T)(implicit m: scala.reflect.Manifest[T]) {
+    val key = bindingKey(m, None)
+    bindings += key -> new NewBoundInstanceProvider(func)
+  }
+
+  private def bindEagerInstance[T <: Any](name: String, instance: T)(implicit m: scala.reflect.Manifest[T]) {
     val key = bindingKey(m, Some(name))
     bindings += key -> instance
   }
@@ -283,9 +331,19 @@ trait MutableBindingModule extends BindingModule { outer =>
     bindings += key -> new LazyInstanceProvider(func)
   }
 
+  private def bindLazyModuleInstance[T <: Any](name: String, func: BindingModule => T)(implicit m: scala.reflect.Manifest[T]) {
+    val key = bindingKey(m, Some(name))
+    bindings += key -> new LazyModuleInstanceProvider(this, func)
+  }
+
   private def bindProvider[T <: Any](name: String, func: () => T)(implicit m: scala.reflect.Manifest[T]) {
     val key = bindingKey(m, Some(name))
     bindings += key -> new NewInstanceProvider(func)
+  }
+
+  private def bindProvider[T <: Any](name: String, func: BindingModule => T)(implicit m: scala.reflect.Manifest[T]) {
+    val key = bindingKey(m, Some(name))
+    bindings += key -> new NewBoundInstanceProvider(func)
   }
 
   private def bindClass[T <: Any](instanceProvider: ClassInstanceProvider[T])(implicit m: scala.reflect.Manifest[T]) {
@@ -330,25 +388,19 @@ trait MutableBindingModule extends BindingModule { outer =>
    * Prints to standard out.
    */
   def showMap() {
-    println(mapString.mkString("\n"))
+    println(listBindings.mkString("\n"))
   }
 
   def showDeepBindings() {
     println(deepMapString.mkString("\n"))
   }
 
-  /**
-   * A convenient way to obtain a string representation of the current bindings in this module.
-   */
-  def mapString = {
-    for ((k, v) <- bindings) yield { k.toString + " -> " + v.toString }
-  }
-
   def deepMapString = {
     def getDeep(x: Any): String = x match {
-      case ip: ClassInstanceProvider[_] => "Class: " + ip.newInstance().toString
+      case ip: ClassInstanceProvider[_] => "Class: " + ip.newInstance(this).toString
       case lip: LazyInstanceProvider[_] => "Lazy: " + lip.instance.toString
       case nip: NewInstanceProvider[_] => "New: " + nip.instance.toString
+      case nbip: NewBoundInstanceProvider[_] => "New: " + nbip.instance(this).toString
       case i => "Just: " + i.toString
     }
 
@@ -396,6 +448,24 @@ trait MutableBindingModule extends BindingModule { outer =>
     }
 
     /**
+     * Bind to a provider of type I where I is any subtype of T. This overloaded form of toProvider takes a function
+     * that accepts a binding module and returns
+     * an instance of type I, and may perform any necessary operation in order to provide I, for example if
+     * the current web session is to be injected, the provider may use whatever mechanism is required to obtain
+     * the correct current web session for the current user, etc. and provide that back to the injection site.
+     * The function will be evaluated for each injection of the matching binding and may return a unique instance
+     * each time, or the same one, or anything in between.
+     * @param function a function taking a binding module and returning type I where I is a subtype of the bound type T.
+     */
+    def toProvider[I <: T](function: BindingModule => I) {
+      name match {
+        case Some(n) => outer.bindProvider[T](n, function)
+        case None => outer.bindProvider[T](function)
+      }
+      name = None
+    }
+
+    /**
      * Bind to a single instance of I where I is a subtype of the bound type T. The single instance will not be
      * decided until the first time the matching binding is injected, but from then on will always be the same
      * instance. This is to provide a way to cope with injection of items that may not have been configured at
@@ -420,9 +490,37 @@ trait MutableBindingModule extends BindingModule { outer =>
     def toSingleInstance[I <: T](function: => I) = toSingle[I](function)
 
     /**
+     * Bind to an instance of I that will be a singleton *within* the module only. That is, if a new injection is
+     * requested from the same module, it will be the same instance as other injections of that type within the module,
+     * but if a new module is used, a different "single" instance will be created and returned. In this way,
+     * instances can be "late configured" with new configuration information or injections as new modules are
+     * employed, but it does not require a brand new instance to be returned for every usage, like with a provider
+     * method or with the reflection instance injection. The function provided must consume a module, which the
+     * injector will provide from the current module configuration. When new modules are created, the singletons in
+     * that new module will be reset and will then be created anew when first used. Existing singletons in other
+     * modules will, of course, be unaffected.
+     * <p/>
+     * Example usage:
+     * <pre>
+     *   module.bind [Database] idBy 'addressDb toModuleSingle { implicit module => new MySQLAddressDB }
+     * </pre>
+     * @param function A function that must take a binding module, and returns a new instance using that module
+     *                 to provide configuration information. If you mark the module implicit in the parameter
+     *                 declaration, new instances of injected classes created in the function will automatically
+     *                 get the latest configuration.
+     * @tparam I The instance type I that will be created by the function - must be a subtype of T
+     */
+    def toModuleSingle[I <: T](function: BindingModule => I) = {
+      name match {
+        case Some(n) => outer.bindLazyModuleInstance[T](n, function)
+        case None => outer.bindLazyModuleInstance[T](function)
+      }
+    }
+
+    /**
      * A convenient operator to bind to an instance of None (in this definition). Can be used instead of
      * unbind. For example <code>module.bind [Int] idBy 'timeLimit to None</code>
-     * @param must be None (for this form of the method).
+     * @param none must be None (for this form of the method).
      */
     def to(none: None.type) = {
       name match {
@@ -433,31 +531,22 @@ trait MutableBindingModule extends BindingModule { outer =>
     }
 
     /**
-     * Bind to a class instance provider of class. Intended to be used with instanceOfClass like this:
-     * <code>module.bind [DBLookup] to instanceOfClass [MySQLDBLookup]</code>. Will provide a new
+     * Bind to a class instance provider of class. Intended to be used with newInstanceOf like this:
+     * <code>module.bind [DBLookup] to newInstanceOf [MySQLDBLookup]</code>. Will provide a new
      * instance of the class configured for each injection site. Any instance provided in this way
      * must provide a zero parameter default constructor since reflection is used to create the instance
      * and it will fail if there is no default constructor. Note that this is true even for implicit
      * parameters, so you cannot use this form if you wish to provide the implicit binding chain to the
      * target instance. Use a toProvider instead.
-     * @param instOfClass the class instance provider to use for the binding. Use instanceOfClass method
-     * to conveniently obtain the right thing.
+     * @param instOfClass the class instance provider to use for the binding. Use newInstanceOf method
+     * or moduleInstanceOf method from MutableBindingModule to conveniently obtain the right thing.
      */
-    def to(instOfClass: ClassInstanceProvider[T]) = {
+    def to[U <: T](instOfClass: ClassInstanceProvider[U]) = {
       name match {
-        case Some(n) => outer.bindClass[T](n, instOfClass)
-        case None => outer.bindClass[T](instOfClass)
+        case Some(n) => outer.bindClass[T](n, instOfClass.asInstanceOf[ClassInstanceProvider[T]])
+        case None => outer.bindClass[T](instOfClass.asInstanceOf[ClassInstanceProvider[T]])
       }
       name = None
-    }
-
-    /**
-     * Create a class instance provider for the given class parameter. Intended for use with to(instOfClass).
-     * Note that this will only work to provide instances of classes that have a zero arg default constructor.
-     * reflection is used to create the class instance.
-     */
-    def instanceOfClass[I <: T](implicit m: scala.reflect.Manifest[I], t: scala.reflect.Manifest[T]) = {
-      new ClassInstanceProvider[T](m.erasure.asInstanceOf[Class[Any]])
     }
 
     /**
@@ -470,6 +559,7 @@ trait MutableBindingModule extends BindingModule { outer =>
      * It uses reflection to instantiate the class and will fail at injection time if no such default constructor is
      * available.
      */
+    @deprecated(message="Use bind [Trait] to newInstanceOf[Impl] instead, or consider bind [Trait] to moduleInstanceOf[Impl]", "2.0")
     def toClass[I <: T](implicit m: scala.reflect.Manifest[I], t: scala.reflect.Manifest[T]) = {
       name match {
         case Some(n) => outer.bindClass[T](n, new ClassInstanceProvider[T](m.erasure.asInstanceOf[Class[Any]]))
@@ -508,7 +598,16 @@ trait MutableBindingModule extends BindingModule { outer =>
       this
     }
 
+    /**
+     * Convenience alias to indentifiedBy - works exactly the same.
+     * @param symbol the symbol name to identify the binding when used in combination with the type parameter.
+     */
     def idBy(symbol: Symbol) = identifiedBy(symbol)
+    
+    /**
+     * Convenience alias to indentifiedBy - works exactly the same.
+     * @param name the string name to identify the binding when used in combination with the type parameter.
+     */
     def idBy(name: String) = identifiedBy(name)
   }
 

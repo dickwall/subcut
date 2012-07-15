@@ -21,7 +21,7 @@ class FrozenModuleTest extends FunSuite with ShouldMatchers with SeveredStackTra
   }
 
   test("Bind addition into the module") {
-    MathModule.bind[MathFunc].toClass[AddFunc]
+    MathModule.bind [MathFunc] to newInstanceOf [AddFunc]
 
     // we should now have a working addition injected
     val mathFuncInjected = new MathFuncInjected
@@ -29,14 +29,14 @@ class FrozenModuleTest extends FunSuite with ShouldMatchers with SeveredStackTra
   }
 
   test("Re-bind - before being fixed") {
-    MathModule.bind[MathFunc].toClass[AddFunc]
+    MathModule.bind [MathFunc] to newInstanceOf [AddFunc]
 
     // we should now have a working addition injected
     val mathFuncInjected = new MathFuncInjected
     mathFuncInjected.doIt(6, 3) should be (9)
 
     // rebind to multiplication
-    MathModule.bind[MathFunc].toClass[MultFunc]
+    MathModule.bind [MathFunc] to newInstanceOf [MultFunc]
 
     // original instance should be unaffected
     mathFuncInjected.doIt(6, 3) should be (9)
@@ -47,7 +47,7 @@ class FrozenModuleTest extends FunSuite with ShouldMatchers with SeveredStackTra
   }
 
   test("Re-bind after module is frozen") {
-    MathModule.bind[MathFunc].toClass[AddFunc]
+    MathModule.bind [MathFunc] to newInstanceOf [AddFunc]
 
     // we should now have a working addition injected
     val mathFuncInjected = new MathFuncInjected
@@ -57,7 +57,7 @@ class FrozenModuleTest extends FunSuite with ShouldMatchers with SeveredStackTra
 
     // rebind to multiplication
     intercept[BindingException] {
-      MathModule.bind[MathFunc].toClass[MultFunc]
+      MathModule.bind [MathFunc] to newInstanceOf [MultFunc]
     }
 
     // original instance should be unaffected

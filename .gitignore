@@ -6,3 +6,7 @@ lib_managed
 project/boot
 project/plugins/project
 project/plugins/src_managed
+.idea
+.ensime
+.ensime_port
+project

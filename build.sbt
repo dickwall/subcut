@@ -4,15 +4,15 @@ organization := "org.scala-tools.subcut"
 
 version := "1.1-SNAPSHOT"
 
-crossScalaVersions := Seq("2.10.0-M3","2.9.2", "2.9.1-1", "2.9.1","2.9.0-1","2.9.0")
+crossScalaVersions := Seq("2.10.0-M7","2.9.2", "2.9.1-1", "2.9.1","2.9.0-1","2.9.0")
 
-scalaVersion := "2.10.0-M3"
+scalaVersion := "2.10.0-M7"
 
 scalacOptions += "-deprecation"
 
 resolvers += ScalaToolsSnapshots
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "1.8-SNAPSHOT" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "2.0.M4" % "test"
 
 libraryDependencies += "junit" % "junit" % "4.5" % "test"
 
@@ -20,13 +20,13 @@ libraryDependencies <<= (scalaVersion, libraryDependencies) { (ver, deps) =>
   deps :+ "org.scala-lang" % "scala-compiler" % ver
 }
 
-publishTo <<= (version) { version: String =>
-  val scalaTools = "http://nexus.scala-tools.org/content/repositories/"
-  if (version.trim.endsWith("SNAPSHOT")) Some("snapshots" at scalaTools + "snapshots/")
-  else Some("releases" at scalaTools + "releases/")
-}
+//publishTo <<= (version) { version: String =>
+//  val scalaTools = "http://nexus.scala-tools.org/content/repositories/"
+//  if (version.trim.endsWith("SNAPSHOT")) Some("snapshots" at scalaTools + "snapshots/")
+//  else Some("releases" at scalaTools + "releases/")
+//}
 
-credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
+//credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
 
 pomExtra := <xml:group>
     <inceptionYear>2011</inceptionYear>

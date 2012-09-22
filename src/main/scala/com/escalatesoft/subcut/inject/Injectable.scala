@@ -1,4 +1,4 @@
-package org.scala_tools.subcut.inject
+package com.escalatesoft.subcut.inject
 
 /**
  * The trait that provides dependency injection features for a class or object. To use this trait,

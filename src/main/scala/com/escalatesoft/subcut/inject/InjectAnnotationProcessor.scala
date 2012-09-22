@@ -1,4 +1,4 @@
-package org.scala_tools.subcut.inject
+package com.escalatesoft.subcut.inject
 
 import tools.nsc.plugins.{Plugin, PluginComponent}
 import tools.nsc.Global

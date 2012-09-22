@@ -1,4 +1,4 @@
-package org.scala_tools.subcut.inject
+package com.escalatesoft.subcut.inject
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers

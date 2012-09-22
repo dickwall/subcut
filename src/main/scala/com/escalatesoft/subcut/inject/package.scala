@@ -1,4 +1,4 @@
-package org.scala_tools.subcut
+package com.escalatesoft.subcut
 
 /**
  * Created by IntelliJ IDEA.

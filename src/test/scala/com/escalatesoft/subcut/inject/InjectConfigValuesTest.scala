@@ -1,4 +1,4 @@
-package org.scala_tools.subcut.inject
+package com.escalatesoft.subcut.inject
 
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.{FunSuite, SeveredStackTraces}

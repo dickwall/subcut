@@ -1,6 +1,6 @@
 name := "subcut"
 
-organization := "org.scala-tools.subcut"
+organization := "com.escalatesoft.subcut"
 
 version := "2.0-SNAPSHOT"
 
@@ -18,11 +18,17 @@ libraryDependencies <<= (scalaVersion, libraryDependencies) { (ver, deps) =>
   deps :+ "org.scala-lang" % "scala-compiler" % ver
 }
 
-publishTo <<= (version) { version: String =>
-  val scalaTools = "http://nexus.scala-tools.org/content/repositories/"
-  if (version.trim.endsWith("SNAPSHOT")) Some("snapshots" at scalaTools + "snapshots/")
-  else Some("releases" at scalaTools + "releases/")
+publishMavenStyle := true
+
+publishTo <<= version { (v: String) =>
+  val nexus = "https://oss.sonatype.org/"
+  if (v.trim.endsWith("SNAPSHOT")) 
+    Some("snapshots" at nexus + "content/repositories/snapshots") 
+  else
+    Some("releases"  at nexus + "service/local/staging/deploy/maven2")
 }
+
+publishArtifact in Test := false
 
 credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
 

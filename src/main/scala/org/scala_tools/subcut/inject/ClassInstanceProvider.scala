@@ -42,13 +42,13 @@ private[inject] class ClassSingleModuleProvider[I <: Any](clazz: Class[Any]) ext
 private[inject] class LazyInstanceProvider[I <: Any](fn: () => I) {
   lazy val instance: I = fn()    // create an instance the first time we use it, and always use that
 
-  override def toString = "LazyInstanceProvider[%s]".format(instance.getClass.toString)
+  override def toString = "LazyInstanceProvider[" + instance.toString + "]"
 }
 
 private[inject] class LazyModuleInstanceProvider[I <: Any](module: BindingModule, fn: BindingModule => I) {
   lazy val instance: I = fn(module)
 
-  override def toString = "LazyModuleInstanceProvider[%s]".format(instance.getClass.toString)
+  override def toString = "LazyModuleInstanceProvider[" + instance.toString + "]"
 
   private[inject] def copyAndReset(newModule: BindingModule) = new LazyModuleInstanceProvider(newModule, fn)
 }

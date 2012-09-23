@@ -22,3 +22,5 @@ uses or effective recipes. There is a [Getting Started](https://github.com/dickw
 going, and (in the author's opinion), the best way to use subcut effectively.
 
 Scaladocs can be found on the [GitHub home page for SubCut](http://dickwall.github.com/subcut).
+
+Or, take a look at an overview of [What's new in SubCut 2.0](https://github.com/dickwall/subcut/blob/master/NewIn2.0.md)

@@ -28,11 +28,14 @@ This is just one recipe that works, and is my recommendation. There are other wa
 
     ```scala
 
-    object SomeConfigurationModule extends NewBindingModule({ implicit module =>
+    object SomeConfigurationModule extends NewBindingModule(module => {
       import module._  // optional but convenient
 
       bind [X] toSingle Y
       bind [Z] toProvider { codeToGetInstanceOfZ() }
+      bind [A] toProvider { implicit module => new AnotherInjectedClass(param1, param2) }
+      bind [B] to newInstanceOf [Fred]    // create a new instance of Fred every time - Fred require injection
+      bind [C] to moduleInstanceOf [Jane] // create a module scoped singleton Jane that will be used
     })
     ```
 
@@ -86,17 +89,15 @@ For maven:
 
 ```xml
     <dependency>
-      <groupId>org.scala-tools.subcut</groupId>
-      <artifactId>subcut_2.9.1</artifactId>
-      <version>1.0</version>
+      <groupId>com.escalatesoft.subcut</groupId>
+      <artifactId>subcut_2.9.2</artifactId>
+      <version>2.0-SNAPSHOT</version>
     </dependency>
 ```
 
-replace _2.9.1 with the version of Scala you are using.
-Replace 1.0 with whatever the latest stable version of subcut is (or add -SNAPSHOT if you want a snapshot).
-Snapshot and release builds are available from the scala-tools repo. Note that if you don't have the
-scala-tools repo in your list of maven repositories, see http://scala-tools.org for details on how to add
-it.
+replace _2.9.2 with the version of Scala you are using.
+Replace 2.0-SNAPSHOT with whatever the latest stable version of subcut is (or add -SNAPSHOT if you want a snapshot).
+Snapshot and release builds are available from the maven central repo.
 
 For sbt:
 
@@ -104,10 +105,10 @@ See the instructions for maven about versions and repo configuration. To use sub
 the dependency:
 
 ```scala
-    "org.scala-tools.subcut" %% "subcut" % "1.0"
+    "com.escalatesoft.subcut" %% "subcut" % "2.0-SNAPSHOT"
 ```
 
-replacing 1.0 with the latest (or desired) version of subcut.
+replacing 2.0-SNAPSHOT with the latest (or desired) version of subcut.
 
 
 ## Setting up a configuration module
@@ -118,7 +119,7 @@ bindings that can be used. For more possibilities, see the bottom of this sectio
 To create a new immutable binding module:
 
 ```scala
-    object ProjectConfiguration extends NewBindingModule({ module =>
+    object ProjectConfiguration extends NewBindingModule(module => {
       import module._   // can now use bind directly
       
       bind [Database] toSingle new MySQLDatabase
@@ -350,7 +351,7 @@ need to do the following:
   In sbt, use
 
 ```scala
-  addCompilerPlugin("org.scala-tools.subcut" %% "subcut" % "1.0")
+  addCompilerPlugin("com.escalatesoft.subcut" %% "subcut" % "2.0") // (or 2.0-SNAPSHOT right now)
 ```
   in the project build settings. In your IDE or other build environment, use the recommended method there
   to add the compiler plugin.

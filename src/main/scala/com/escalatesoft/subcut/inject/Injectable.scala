@@ -35,7 +35,7 @@ trait Injectable {
    * matching binding, this method will throw a BindingException. The string ID is interchangeable with the
    * symbol version of the same ID, in other words 'maxPoolSize and "maxPoolSize" are considered equivalent by the
    * lookup mechanism.
-   * @param symbol the identifying name to look up for the binding, e.g. "maxPoolSize"
+   * @param name the identifying name to look up for the binding, e.g. "maxPoolSize"
    * @return an instance configured by the binding module to use for the given trait and ID
    */
   def inject[T <: Any](name: String)(implicit m: scala.reflect.Manifest[T]): T =
@@ -46,7 +46,7 @@ trait Injectable {
    * If no instance is provided (i.e. the existing impl passed in is null) and no binding is available to match, a
    * BindingException will be thrown. If an existing impl is provided (not null), then the binding will not be
    * used and does not need to be present. This form of the inject does not need a provided ID symbol or string.
-   * @param the implToUse from the call site. If it is null, the binding provider will fill it in instead
+   * @param implToUse from the call site. If it is null, the binding provider will fill it in instead
    * @return an instance configured by the binding module to use for the given trait
    */
   def injectIfMissing[T <: Any](implToUse: Option[T])(implicit m: scala.reflect.Manifest[T]): T =
@@ -72,7 +72,7 @@ trait Injectable {
    * BindingException will be thrown. If an existing impl is provided (not null), then the binding will not be
    * used and does not need to be present. This form of the inject takes a string ID to use to match the binding.
    * @param implToUse from the call site. If it is null, the binding provider will fill it in instead
-   * @param name binding ID string to use - e.g. 'maxPoolSize
+   * @param symbol binding ID symbol to use - e.g. 'maxPoolSize
    * @return an instance configured by the binding module to use for the given trait
    */
   def injectIfMissing[T <: Any](implToUse: Option[T], symbol: Symbol)(implicit m: scala.reflect.Manifest[T]): T =
@@ -96,7 +96,7 @@ trait Injectable {
         if (implToUse == null)
           throw new IllegalStateException("No binding for %s, so provided impl function may not result in null".format(m.erasure.toString))
         implToUse
-      case Some(instance) => instance.asInstanceOf[T]
+      case Some(instance) => instance
     }
   }
 
@@ -118,7 +118,7 @@ trait Injectable {
         if (implToUse == null)
           throw new IllegalStateException("No binding for %s named %s, so provided impl function may not result in null".format(m.erasure.toString, name))
         implToUse
-      case Some(instance) => instance.asInstanceOf[T]
+      case Some(instance) => instance
     }
   }
 
@@ -128,7 +128,7 @@ trait Injectable {
    * injection usage, as the typical configuration can be provided at the call site and developers can easily
    * see what the "usual" instance is. An alternative binding will only be used if it is defined, e.g. for testing.
    * This form of the injector takes a string ID to use in the binding definition lookup, e.g. "maxPoolSize".
-   * @param name string ID to be used to identify the matching binding definition.
+   * @param symbol ID to be used to identify the matching binding definition.
    * @param fn a function to be used to return an instance, if there is no binding defined for the desired trait.
    * @return an instance that subclasses the trait, either from the binding definitions, or using the provided
    * function if no matching binding is defined.
@@ -161,7 +161,7 @@ trait Injectable {
    * matching binding, this method will return None. The string ID is interchangeable with the
    * symbol version of the same ID, in other words 'maxPoolSize and "maxPoolSize" are considered equivalent by the
    * lookup mechanism.
-   * @param symbol the identifying name to look up for the binding, e.g. "maxPoolSize"
+   * @param name the identifying name to look up for the binding, e.g. "maxPoolSize"
    * @return an optional instance configured by the binding module to use for the given trait and ID
    */
   def injectOptional[T <: Any](name: String)(implicit m: scala.reflect.Manifest[T]): Option[T] =

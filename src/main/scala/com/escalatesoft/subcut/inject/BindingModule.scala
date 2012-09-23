@@ -34,7 +34,7 @@ trait BindingModule { outer =>
     new BindingModule {
       override val bindings = (other.bindings ++ outer.bindings) mapValues {
         case lmip: LazyModuleInstanceProvider[_] => lmip.copyAndReset(this)
-        case other => other
+        case notLmip => notLmip
       }
     }
   }
@@ -133,7 +133,7 @@ trait BindingModule { outer =>
  * class ProductionBindings extends NewBindingModule({ implicit module =>
  *    import module._   // for convenience
  *    bind [DBLookup] toSingle new MySQLLookup
- *    bind [WebService].toClass[RealWebService]
+ *    bind [WebService] to newInstanceOf[RealWebService]
  *    bind [Int] identifiedBy 'maxPoolSize toSingle 10   // could also use idBy instead of identifiedBy
  *    bind [QueryService] toSingle { new SlowInitQueryService }
  * })
@@ -157,9 +157,9 @@ class NewBindingModule(fn: MutableBindingModule => Unit) extends BindingModule {
  * to use this class:
  * <pre>
  * import NewBindingModule._
- * implicit val bindingModule = newBindingModule { implicit module =>
- *    bind [DBLookup] toSingle new MySQLLookup
- *    bind [WebService].toClass[RealWebService]
+ * implicit val bindingModule = newBindingModule { module =>
+ *    bind [DBLookup] toProvider { module => new MySQLLookup(module) } // could use implicit module => instead
+ *    bind [WebService] to newInstanceOf [RealWebService]
  *    bind [Int] identifiedBy 'maxPoolSize toSingle 10   // could also use idBy instead of identifiedBy
  *    bind [QueryService] toSingle { new SlowInitQueryService }
  * }
@@ -184,7 +184,7 @@ object NewBindingModule {
  * <p/>
  * An example usage will look like this:
  * <pre>
- * class SomeBindings extends NewBindingModule ( implicit module => {
+ * class SomeBindings extends NewBindingModule (module => {
  *   import module._
  *   bind [Trait1] toSingle new Class1Impl
  * })

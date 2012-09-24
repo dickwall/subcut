@@ -130,12 +130,12 @@ trait BindingModule { outer =>
  * To use this class:
  * <p/>
  * <pre>
- * class ProductionBindings extends NewBindingModule({ implicit module =>
+ * class ProductionBindings extends NewBindingModule(module => {
  *    import module._   // for convenience
- *    bind [DBLookup] toSingle new MySQLLookup
- *    bind [WebService] to newInstanceOf[RealWebService]
+ *    bind [DBLookup] to moduleInstanceOf [MySQLLookup]
+ *    bind [WebService] to newInstanceOf [RealWebService]
  *    bind [Int] identifiedBy 'maxPoolSize toSingle 10   // could also use idBy instead of identifiedBy
- *    bind [QueryService] toSingle { new SlowInitQueryService }
+ *    bind [QueryService] toProvider { implicit module => new SlowInitQueryService }
  * })
  * </pre>
  * @param fn a function that takes a mutable binding module and initializes it with whatever bindings

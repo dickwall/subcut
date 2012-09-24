@@ -96,6 +96,7 @@
           <args>
             <arg>-target:jvm-1.5</arg>
           </args>
+          <recompileMode>modified-only</recompileMode>
         </configuration>
       </plugin>
       <plugin>

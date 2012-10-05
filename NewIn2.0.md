@@ -75,6 +75,7 @@
      bind [Int] identifiedBy 'maxPoolSize toSingle 10   // could also use idBy instead of identifiedBy
      bind [QueryService] to moduleInstanceOf[SlowInitQueryService]
   }
+  ```
 
 * In much of the subcut 1.0 example code, the first thing to happen in a NewBindingModule was that module was
   made implicit, like this:

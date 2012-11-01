@@ -43,8 +43,8 @@ class AnnotationsInjectPlugin(val global: Global) extends Plugin {
               Select(
                 Ident(
                   newTermName("_root_")),
-                newTermName("org")),
-              newTermName("scala_tools")),
+                newTermName("com")),
+              newTermName("escalatesoft")),
             newTermName("subcut")),
           newTermName("inject")),
         newTypeName("BindingModule"))

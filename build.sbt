@@ -34,8 +34,8 @@ credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
 
 pomExtra := <xml:group>
     <inceptionYear>2011</inceptionYear>
-    <name>Scala Uniquely Bound Classes Under Traits: SubCut</name>
     <description>
+      Scala Uniquely Bound Classes Under Traits: SubCut.
       A simple, lightweight and convenient way to inject dependencies
       in scala, in a scala-like way.
     </description>

@@ -138,6 +138,7 @@ class ModuleSpecificInstanceTest extends FunSuite with ShouldMatchers {
     habitat2.reptile.domain should be theSameInstanceAs (habitat.reptile.domain)
 
     val bm2 = SheepProviderModule ~ DogSnakeProviderModule
+    bm2.listBindings foreach println
 
     val habitat3 = new Habitat()(bm2)
     habitat3.quadruped should not be theSameInstanceAs(habitat.quadruped)
@@ -174,6 +175,40 @@ class ModuleSpecificInstanceTest extends FunSuite with ShouldMatchers {
     habitat5.reptile.domain should be theSameInstanceAs (habitat5.quadruped.domain)
     habitat5.quadruped should not be theSameInstanceAs(habitat4.quadruped)
     habitat5.reptile should not be theSameInstanceAs(habitat4.reptile)
+  }
+
+  test ("for new NewBindingModule method, toModuleSingle should still work as expected") {
+    val custom = new NewBindingModule(module => {
+      module.bind [Quadruped] toModuleSingle { implicit module => new Sheep }
+      module.bind [Domain] toModuleSingle { implicit module => new Desert }
+    })
+    // simple lookup
+    val newConfig: BindingModule = custom
+    val quad1 = newConfig.inject[Quadruped](None)
+    val quad2 = newConfig.inject[Quadruped](None)
+    quad1 should be theSameInstanceAs quad2
+
+    val dom1 = newConfig.inject[Domain](None)
+    val dom2 = newConfig.inject[Domain](None)
+    dom1 should be theSameInstanceAs dom2
+  }
+
+  test ("toModuleSingle should work just fine with ~ merges") {
+    val a = new NewBindingModule(module => {
+      module.bind[Domain] toModuleSingle { implicit module => new Desert }
+    })
+    val b = new NewBindingModule(module => {
+      module.bind[Domain] toModuleSingle { implicit module => new Desert }
+    })
+    val dom1 = a.inject[Domain](None)
+    val dom2 = b.inject[Domain](None)
+    dom1 should not be theSameInstanceAs (dom2)
+    val config: BindingModule = a ~ b
+    val dom3 = config.inject[Domain](None)
+    val dom4 = config.inject[Domain](None)
+    dom3 should be theSameInstanceAs (dom4)
+    dom3 should not be theSameInstanceAs (dom1)
+    dom3 should not be theSameInstanceAs (dom2)
   }
 }
 

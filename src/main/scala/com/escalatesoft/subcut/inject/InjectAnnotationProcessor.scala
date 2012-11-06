@@ -23,8 +23,8 @@ class AnnotationsInjectPlugin(val global: Global) extends Plugin {
     val global: AnnotationsInjectPlugin.this.global.type = AnnotationsInjectPlugin.this.global
     import global._
 
-    // val runsAfter = "parser"
     //Using the Scala Compiler 2.8.x the runsAfter should be written as below
+    // val runsAfter = "parser"
     val runsAfter = List[String]("parser")
     override val runsBefore = List[String]("namer")
     val phaseName = AnnotationsInjectPlugin.this.name

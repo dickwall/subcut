@@ -26,18 +26,35 @@ trait BindingModule { outer =>
   
   /**
    * Merge this module with another. The resulting module will include all bindings from both modules, with this
-   * module winning if there are common bindings (binding override).
+   * module winning if there are common bindings (binding override). If you prefer symbolic operators,
+   * ~ is an alias for this.
    * @param other another BindingModule to cons with this one. Any duplicates will favor the bindings from this
    * rather than other.
    */
-  def ~(other: BindingModule): BindingModule = {
-    new BindingModule {
-      override val bindings = (other.bindings ++ outer.bindings) mapValues {
-        case lmip: LazyModuleInstanceProvider[_] => lmip.copyAndReset(this)
-        case notLmip => notLmip
-      }
+  def then(other: BindingModule): BindingModule = {
+    val combined: immutable.Map[BindingKey[_], Any] = other.bindings ++ outer.bindings
+
+    // copy the bindings into the new module and reset the module instances on the way in using that new module
+    // for configuration. mapValues is no good here as it is lazy and resets the module instances on each usage
+    new BindingModule { newModule =>
+      override val bindings: immutable.Map[BindingKey[_], Any] = (for ((key, value) <- combined) yield {
+        value match {
+          case lmip: LazyModuleInstanceProvider[_] =>
+            key -> lmip.copyAndReset(newModule)
+          case notLmip =>
+            key -> notLmip
+        }}).toMap
     }
   }
+
+  /**
+   * Merge this module with another. The resulting module will include all bindings from both modules, with this
+   * module winning if there are common bindings (binding override). If you prefer non-symbolic methods, "then"
+   * is an alias for this.
+   * @param other another BindingModule to cons with this one. Any duplicates will favor the bindings from this
+   * rather than other.
+   */
+  def ~(other: BindingModule): BindingModule = then(other)
 
   /**
    * Provide a mutable copy of these bindings to a passed in function so that it can override the bindings

@@ -50,7 +50,8 @@ private[inject] class LazyModuleInstanceProvider[I <: Any](module: BindingModule
 
   override def toString = "LazyModuleInstanceProvider[" + instance.toString + "]"
 
-  private[inject] def copyAndReset(newModule: BindingModule) = new LazyModuleInstanceProvider(newModule, fn)
+  private[inject] def copyAndReset(newModule: BindingModule) =
+    new LazyModuleInstanceProvider(newModule, fn)
 }
 
 private[inject] class NewInstanceProvider[I <: Any](fn: () => I)(implicit m: Manifest[I]) {

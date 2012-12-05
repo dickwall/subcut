@@ -17,13 +17,13 @@ import io.Source
 class ModuleCompositionAndMergingTest extends FunSuite with ShouldMatchers with SeveredStackTraces {
 
   test("Modules should be composable the :: operator") {
-    implicit def billsBindings = MediumGardenModule then LawnModule then LarchModule
+    implicit def billsBindings = MediumGardenModule andThen LawnModule andThen LarchModule
     val billsGarden = new Garden    // will pick up the configuration module implicitly
     billsGarden.describeGarden should be ("The garden is 200 sq ft, has a Larch tree 120 high, Grass ground covering that cost 50 initially and 25 maintenance")
   }
 
   test("Modules using the :: operator should have left to right priority") {
-    implicit def sallysBindings = SmallGardenModule then MediumGardenModule then OakModule then LawnModule then LarchModule
+    implicit def sallysBindings = SmallGardenModule andThen MediumGardenModule andThen OakModule andThen LawnModule andThen LarchModule
     val sallysGarden = new Garden    // will pick up the configuration module implicitly
     sallysGarden.describeGarden should be ("The garden is 50 sq ft, has a Oak tree 150 high, Grass ground covering that cost 50 initially and 25 maintenance")
   }
@@ -36,14 +36,14 @@ class ModuleCompositionAndMergingTest extends FunSuite with ShouldMatchers with 
 
   test("Merging configuration strings over existing") {
     val fromProperties = new FromProperties
-    implicit val configuration = fromProperties then StandardConfiguration
+    implicit val configuration = fromProperties andThen StandardConfiguration
     configuration.modifyBindings { mod =>
       mod.showDeepBindings()
     }
 
     println("----")
 
-    implicit val orig = StandardConfiguration then fromProperties
+    implicit val orig = StandardConfiguration andThen fromProperties
     orig.modifyBindings { mod =>
       mod.showDeepBindings()
     }

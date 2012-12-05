@@ -7,6 +7,7 @@ package com.escalatesoft.subcut.inject
  * Time: 11:39 AM
  */
 import scala.collection._
+import annotation.implicitNotFound
 
 /**
  * The binding key, used to uniquely identify the desired injection using the class and an optional name.
@@ -19,6 +20,7 @@ private[inject] case class BindingKey[A](m: Manifest[A], name: Option[String])
  * (recommended - the result will be immutable) or a MutableBindingModule (not recommended unless you know what
  * you are doing and take on the thread safety responsibility yourself).
  */
+@implicitNotFound("BindingModule not found, does the creating class have an implicit BindingModule or mix-in AutoInjectable?\nDo you have the compiler plugin enabled if required?")
 trait BindingModule { outer =>
 
   /** Abstract binding map definition */
@@ -31,7 +33,7 @@ trait BindingModule { outer =>
    * @param other another BindingModule to cons with this one. Any duplicates will favor the bindings from this
    * rather than other.
    */
-  def then(other: BindingModule): BindingModule = {
+  def andThen(other: BindingModule): BindingModule = {
     val combined: immutable.Map[BindingKey[_], Any] = other.bindings ++ outer.bindings
 
     // copy the bindings into the new module and reset the module instances on the way in using that new module
@@ -49,12 +51,12 @@ trait BindingModule { outer =>
 
   /**
    * Merge this module with another. The resulting module will include all bindings from both modules, with this
-   * module winning if there are common bindings (binding override). If you prefer non-symbolic methods, "then"
+   * module winning if there are common bindings (binding override). If you prefer non-symbolic methods, "andThen"
    * is an alias for this.
    * @param other another BindingModule to cons with this one. Any duplicates will favor the bindings from this
    * rather than other.
    */
-  def ~(other: BindingModule): BindingModule = then(other)
+  @inline def ~(other: BindingModule): BindingModule = andThen(other)
 
   /**
    * Provide a mutable copy of these bindings to a passed in function so that it can override the bindings

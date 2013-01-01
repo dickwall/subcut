@@ -4,7 +4,6 @@ import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.{SeveredStackTraces, FunSuite}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-import scala.Some
 import java.beans.BeanInfo
 
 /**

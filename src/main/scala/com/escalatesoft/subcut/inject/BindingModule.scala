@@ -7,7 +7,6 @@ package com.escalatesoft.subcut.inject
  * Time: 11:39 AM
  */
 import scala.collection._
-import annotation.implicitNotFound
 
 /**
  * The binding key, used to uniquely identify the desired injection using the class and an optional name.
@@ -20,7 +19,6 @@ private[inject] case class BindingKey[A](m: Manifest[A], name: Option[String])
  * (recommended - the result will be immutable) or a MutableBindingModule (not recommended unless you know what
  * you are doing and take on the thread safety responsibility yourself).
  */
-@implicitNotFound("BindingModule not found, does the creating class have an implicit BindingModule or mix-in AutoInjectable?\nDo you have the compiler plugin enabled if required?")
 trait BindingModule { outer =>
 
   /** Abstract binding map definition */

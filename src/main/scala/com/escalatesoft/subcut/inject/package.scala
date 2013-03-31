@@ -40,5 +40,13 @@ package object inject {
     new ClassSingleModuleProvider[T](m.erasure.asInstanceOf[Class[Any]])
   }
 
+  /**
+   * An implicit conversion from BindingId subclasses to String type, so that objects that extend BindingId
+   * can be used as Binding identifiers both for binding and for injection.
+   * @param bindingId a sub-object of BindingId
+   * @return String short name of Binding object class
+   */
+  implicit def bindingIdToString(bindingId: BindingId): String = bindingId.bindingName
+
 }
 

@@ -274,10 +274,10 @@ trait MutableBindingModule extends BindingModule { outer =>
    * regular bindings.
    * @param other A BindingModules with bindings to merge and/or replace the bindings in this module.
    */
-  def mergeWithReplace(other: BindingModule) = {
+  def mergeWithReplace(other: BindingModule) {
     val resetMap = other.bindings.mapValues {
       case lmip: LazyModuleInstanceProvider[_] => lmip.copyAndReset(this)
-      case other => other
+      case nonLmip => nonLmip
     }
     this.bindings = this.bindings ++ resetMap
   }
@@ -293,7 +293,7 @@ trait MutableBindingModule extends BindingModule { outer =>
    * })
    * </pre>
    */
-  def <~(other: BindingModule) = mergeWithReplace(other)
+  def <~(other: BindingModule) { mergeWithReplace(other) }
 
   /**
    * Replace the current bindings configuration module completely with the bindings from the other module
@@ -315,11 +315,6 @@ trait MutableBindingModule extends BindingModule { outer =>
     for (module <- modules) mergeWithReplace(module)
   }
   
-  private def bindEagerInstance[T <: Any](instance: T)(implicit m: scala.reflect.Manifest[T]) {
-    val key = bindingKey(m, None)
-    bindings += key -> instance
-  }
-
   private def bindLazyInstance[T <: Any](func: () => T)(implicit m: scala.reflect.Manifest[T]) {
     val key = bindingKey(m, None)
     bindings += key -> new LazyInstanceProvider(func)
@@ -338,11 +333,6 @@ trait MutableBindingModule extends BindingModule { outer =>
   private def bindProvider[T <: Any](func: BindingModule => T)(implicit m: scala.reflect.Manifest[T]) {
     val key = bindingKey(m, None)
     bindings += key -> new NewBoundInstanceProvider(func)
-  }
-
-  private def bindEagerInstance[T <: Any](name: String, instance: T)(implicit m: scala.reflect.Manifest[T]) {
-    val key = bindingKey(m, Some(name))
-    bindings += key -> instance
   }
 
   private def bindLazyInstance[T <: Any](name: String, func: () => T)(implicit m: scala.reflect.Manifest[T]) {
@@ -579,7 +569,7 @@ trait MutableBindingModule extends BindingModule { outer =>
      * available.
      */
     @deprecated(message="Use bind [Trait] to newInstanceOf[Impl] instead, or consider bind [Trait] to moduleInstanceOf[Impl]", "2.0")
-    def toClass[I <: T](implicit m: scala.reflect.Manifest[I], t: scala.reflect.Manifest[T]) = {
+    def toClass[I <: T](implicit m: scala.reflect.Manifest[I], t: scala.reflect.Manifest[T]) {
       name match {
         case Some(n) => outer.bindClass[T](n, new ClassInstanceProvider[T](m.erasure.asInstanceOf[Class[Any]]))
         case None => outer.bindClass[T](new ClassInstanceProvider[T](m.erasure.asInstanceOf[Class[Any]]))

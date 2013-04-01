@@ -94,7 +94,7 @@ For maven:
 ```xml
     <dependency>
       <groupId>com.escalatesoft.subcut</groupId>
-      <artifactId>subcut_2.10.1</artifactId>
+      <artifactId>subcut_2.10</artifactId>
       <version>2.0</version>
     </dependency>
 ```

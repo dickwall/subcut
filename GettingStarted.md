@@ -7,8 +7,8 @@ down through your injectable classes. It concentrates on one recommended way to 
 * Immutable binding modules.
 * Binding by trait and trait/name keys.
 * Creating an injectable class with an implicit binding module.
-* Using the injectIfBound semantics (which only use injection if a configuration is defined for a
-  particular trait, otherwise using the provided definition to the right of the injectIfBound method.
+* Using the injectOptional semantics (which only use injection if a configuration is defined for a
+  particular trait, otherwise using the provided definition to the right of the injectOptional method.
 * Testing with mutable copies of binding modules.
 
 There are many other ways in which you can use SubCut, including explicit injection, constructor
@@ -24,18 +24,22 @@ This is just one recipe that works, and is my recommendation. There are other wa
 1. Include SubCut in your dependencies or download the jar file. There are no further dependencies beyond
    the Scala runtime libraries.
 
-2. Create a binding module using 
+2. Create a binding module using, e.g.
 
     ```scala
+    object PoolSize extends BindingId   // probably in another binding IDs file
+    object ServerURL extends BindingId
 
-    object SomeConfigurationModule extends NewBindingModule(module => {
-      import module._  // optional but convenient
+    object SomeConfigurationModule extends NewBindingModule (module => {
+      import module._  // optional but convenient - allows use of bind instead of module.bind
 
       bind [X] toSingle Y
       bind [Z] toProvider { codeToGetInstanceOfZ() }
-      bind [A] toProvider { implicit module => new AnotherInjectedClass(param1, param2) }
+      bind [A] toProvider { implicit module => new AnotherInjectedClass(param1, param2) } // module singleton
       bind [B] to newInstanceOf [Fred]    // create a new instance of Fred every time - Fred require injection
       bind [C] to moduleInstanceOf [Jane] // create a module scoped singleton Jane that will be used
+      bind [Int] idBy PoolSize to 3       // bind an Int identified by PoolSize to constant 3
+      bind [String] idBy ServerURL to "http://escalatesoft.com"
     })
     ```
 
@@ -72,9 +76,9 @@ This is just one recipe that works, and is my recommendation. There are other wa
 
     ```scala
     test("Some test") {
-       SomeConfigurationModule.modifyBindings { testModule =>
+       SomeConfigurationModule.modifyBindings { implicit testModule =>  // modifiable test module is now default
          testModule.bind [SomeTrait] toSingle new FakeSomeTrait
-         val testInstance = new SomeServiceOrClass(param1, param2)(testModule)
+         val testInstance = new SomeServiceOrClass(param1, param2)   // uses test module available implicitly
          // test stuff...
        }
     }
@@ -90,13 +94,13 @@ For maven:
 ```xml
     <dependency>
       <groupId>com.escalatesoft.subcut</groupId>
-      <artifactId>subcut_2.9.2</artifactId>
-      <version>2.0-SNAPSHOT</version>
+      <artifactId>subcut_2.10.1</artifactId>
+      <version>2.0</version>
     </dependency>
 ```
 
-replace _2.9.2 with the version of Scala you are using.
-Replace 2.0-SNAPSHOT with whatever the latest stable version of subcut is (or add -SNAPSHOT if you want a snapshot).
+replace _2.10.1 with the version of Scala you are using.
+Replace 2.0 with whatever the latest stable version of subcut is (or add -SNAPSHOT if you want a snapshot).
 Snapshot and release builds are available from the maven central repo.
 
 For sbt:
@@ -105,10 +109,10 @@ See the instructions for maven about versions and repo configuration. To use sub
 the dependency:
 
 ```scala
-    "com.escalatesoft.subcut" %% "subcut" % "2.0-SNAPSHOT"
+    "com.escalatesoft.subcut" %% "subcut" % "2.0"
 ```
 
-replacing 2.0-SNAPSHOT with the latest (or desired) version of subcut.
+replacing 2.0 with the latest (or desired) version of subcut.
 
 
 ## Setting up a configuration module
@@ -119,65 +123,80 @@ bindings that can be used. For more possibilities, see the bottom of this sectio
 To create a new immutable binding module:
 
 ```scala
+
+    object BindingKeys {   // in some other file?
+      object WebAnalyzerId extends BindingId
+      object CurrentUserId extends BindingId
+      object MaxThreadPoolSizeId extends BindingId
+    }
+
     object ProjectConfiguration extends NewBindingModule(module => {
       import module._   // can now use bind directly
+
+      import BindingKeys._  // use the Binding IDs conveniently
       
       bind [Database] toSingle new MySQLDatabase
-      bind [Analyzer] idBy 'webAnalyzer to instanceOfClass [WebAnalyzer]
-      bind [Session] idBy 'currentUser toProvider { WebServerSession.getCurrentUser().getSession() }
-      bind [Int] idBy 'maxThreadPoolSize toSingle 10
-      bind [WebSearch] toSingle { new GoogleSearchService()(ProjectConfiguration) }
+      bind [Analyzer] idBy WebAnalyzerId to moduleInstanceOf [WebAnalyzer]  // module singleton
+      bind [Session] idBy CurrentUserId toProvider { WebServerSession.getCurrentUser().getSession() }
+      bind [Int] idBy MaxThreadPoolSizeId toSingle 10
+      bind [WebSearch] toModuleSingle { implicit module => new GoogleSearchService() }
     })
 ```
 
 The above bindings are as follows:
 
-Database will be bound to a single instance of MySQLDatabase created at the time the NewBindingModule is
-created. The same instance will always be returned for this binding so care should be taken that this
+Database will be bound to a single instance of MySQLDatabase created the first time this Database binding is
+requested. The same instance will always be returned for this binding so care should be taken that this
 single instance is thread-safe if used in a threaded environment.
 
-Analyzer, with the provided identifying name webAnalyzer, will be bound to a class WebAnalyzer and each
-time the binding is requested, a new instance of WebAnalyzer will be created via reflection and provided
-to the call site. Note that WebAnalyzer must have a zero argument (default) constructor in order for this
-binding to work at run time.
+Analyzer, with the provided identifying ID WebAnalyzerId, will be bound to a class WebAnalyzer. When the
+Analyzer is first requested for a module, a new WebAnalyzer will be created (and injected if required)
+and will then be re-used for every other request made within that module, HOWEVER, if the module is
+modified, or merged in with another, or reconfigured in any way, the binding will be reset, and the next
+time Analyzer is requested, the new WebAnalyzer will be created again and used from that point on. This
+allows configuration to change in new binding modules and get picked up when that new configuration is used
+but avoids the cost of creating a new item every time. This is called Module Singleton, and it is new in 2.0.
 
-Session, with the provided name currentUser, is bound to a function that will provide a Session upon each
+Session, with the provided ID CurrentUserID, is bound to a function that will provide a Session upon each
 use of the binding. This is the most flexible option for providing instances, since the provider method
 can do whatever it likes to return that instance, as long as the instance returned is a sub-type of the
-trait Session.
+trait Session. Another option here is to use the form `toProvider { implicit module => new SomeSession }`
+where SomeSession may itself be injectable. The module is provided to the provider method to use for
+configuration, keeping everything consistent (and should be used whenever a module is required, rather
+than referring to the module this binding is being defined in, since others may wish to override configuration
+later).
 
-The Int identified by maxThreadPoolSize will always return the Int value 10 when used. Note that while
+The Int identified by MaxThreadPoolSizeId will always return the Int value 10 when used. Note that while
 you can bind common types like Int and String without an identifying name, doing do is not recommended
 since the resulting binding will be very broad and could be picked up accidentally.
 
-The final binding, trait WebSearch is bound lazily to a single instance obtained by the provided method.
-There are a couple of things to note about this binding. The toSingle will defer the instance from
-being created until the first time it is bound, but after that the same instance will always be returned
-for that binding. The lazy binding is necessary in this case for the second reason - a specific binding
-configuration is provided to the GoogleSearchService constructor in the form of a second curried
-parameter. It is necessary for this to be included as there is no implicit binding that can be picked up
-in scope within the binding module configuration, and the laziness is required to avoid using the
-configuration module before it has been defined. If this is confusing to you, don't worry about it until
-you have read and understood the implicit binding approach (described below) to providing configuration,
-and then it should make more sense.
+The final binding, trait WebSearch is bound lazily to a module singleton obtained by the provided method.
+There are a couple of things to note about this binding. The toModuleSingle will defer the instance from
+being created until the first time it is requested, but after that the same instance will always be returned
+for that module. Like the module provider example above, the binding module configuration is passed in to
+the function to produce the web service, marking it implicit on the way in means that it can be used
+by default for any injectable classes in that function. This differs from the module provider form in that
+toModuleSingle always returns the same cached instance for a module, while toProvider { module => ... }
+always runs the function again. Also, toModuleSingle bindings will be reset when any copy is taken
+from the current module (i.e. it is merged in to another module or the modifyBindings method is used
+in tests) and will be re-bound on the next request.
 
 Note also that the binding module defined here is a singleton object. There is the recommended usage as
 it keeps things nice and simple. Define it in some package in your project that denotes configuration,
 and makes it easy to find.
 
-You can also optionally make the module loaned to the definition implicit itself, e.g:
-
+In Subcut 2.0 there is a new convenience method for making binding modules without needing to create
+an object or class:
 
 ```scala
-    object ProjectConfiguration extends NewBindingModule({ implicit module =>
+    import NewBindingModule._
+
+    implicit val projectConfiguration = newBindingModule { module =>
       import module._   // can now use bind directly
 
       // ...
+    }
 ```
-
-The implicit before the module parameter makes module implicitly available for other classes that may need
-injection without having to have a separate implicit or explicit module definition. It's just a shortcut for
-convenience.
 
 
 ## Creating an Injectable Class
@@ -185,11 +204,13 @@ convenience.
 To use these bindings in your class, the recommended way is to do as follows:
 
 ```scala
+    import BindingKeys._    // convenient access to the Binding IDs
+
     class DoStuffOnTheWeb(val siteName: String, val date: Date)(implicit val bindingModule: BindingModule) extends Injectable {
       val webSearch = injectOptional [WebSearch] getOrElse { new BingSearchService }
-      val maxPoolSize = injectOptional [Int]('maxThreadPoolSize) getOrElse { 15 }
+      val maxPoolSize = injectOptional [Int](MaxThreadPoolSizeId) getOrElse { 15 }
       val flightLookup = injectOptional [FlightLookup] getOrElse { new OrbitzFlightLookup }
-      val session = injectOptional [Session]('currentUser) getOrElse { Session.getCurrent() }
+      val session = injectOptional [Session](CurrentUserID) getOrElse { Session.getCurrent() }
 
       def doSomethingCool(searchString: String): String = {
         val webSearch = webSearch.search(searchString)
@@ -229,7 +250,7 @@ Some things to note about the definition:
   back to the provided default on the right hand side of the expression, so for example, in the line:
 
 ```scala
-    val session = injectOptional [Session]('currentUser) getOrElse { Session.getCurrent() }
+    val session = injectOptional [Session](CurrentUserId) getOrElse { Session.getCurrent() }
 ```
 
   subcut will look to see if there is a definition bound to trait Session with id 'currentUser, and if so
@@ -261,7 +282,7 @@ Some things to note about the definition:
   binding configuration passed into them automatically unless you explicitly override them.
 
 injectOptional is only one form of injection subcut provides, the others being inject [Trait] which will
-always inject the trait from the bindingModule definition, and will fail if no such binding is provided.
+always inject the trait from the bindingModule definition, and will throw an exception if no such binding is provided.
 The other form is injectIfMissing [Trait] where the instance is only bound in if it has not already been
 provided in a constructor parameter (see the scaladoc for more information on how to use this). Both of
 these other types of injection will fail if no binding has been provided, while injectOptional will always
@@ -340,6 +361,68 @@ class D doesn't need either. The other alternative is to mix in AutoInjectable t
 will add the implicit parameter automatically through the compiler plugin.
 
 
+## Easy Module Merging
+
+There are two easy ways of merging modules together in SubCut (these are useful for splitting up configuration
+into separate modules for maintainability, and then combining them into one uber-module for configuration, or
+indeed allowing lots of flexibility in combining them in different ways).
+
+In-line merging looks like this:
+
+```scala
+// in one location for use:
+implicit val = AppConfiguration ~ ProjectDefaults ~ CompanyDefaults
+```
+
+This will use bindings found in AppConfiguration first, then if a match can't be found it will look in ProjectDefaults
+and finally in CompanyDefaults, and will then consider that there is no binding if it can't find any. Not everyone
+likes to use operators in libraries, so there is a wordy equivalent:
+
+```scala
+implicit val = AppConfiguration andThen ProjectDefaults andThen CompanyDefaults
+```
+
+These work identically, so just decide if you prefer ~ or andThen.
+
+You can also reconfigure your configuration easily with this ~ merger in another place, e.g. a test:
+
+```scala
+// another configuration, in a test, say
+implicit val = TestOverrides ~ AppConfiguration ~ ProjectDefaults ~ CompanyDefaults
+```
+
+There is also Module Definition merging, which looks like this:
+
+```scala
+object UberModule extends NewBindingModule ( module => {
+  import module._
+
+  module <~ CompanyDefaults
+  module <~ ProjectDefaults
+
+  bind [AppService] idBy SomeIdentified toModuleSingle { implicit module => new WackyWonderfulAppService }
+})
+```
+
+In this form, bindings are overwritten as the configuration progresses, so CompanyDefaults will be merged in
+first, then when ProjectDefaults are merged in, any duplicates will be overwritten by ProjectDefaults. Finally
+we can provide some of our own custom bindings after merging in all of the others. Again, a full text method
+name equivalent for <~ is available:
+
+```scala
+object UberModule extends NewBindingModule ( module => {
+  import module._
+
+  module mergeWithReplace CompanyDefaults
+  module mergeWithReplace ProjectDefaults
+
+  bind [AppService] idBy SomeIdentified toModuleSingle { implicit module => new WackyWonderfulAppService }
+})
+```
+
+This is functionally identical to the example above (<~ and mergeWithReplace are aliases).
+
+
 ## AutoInjectable and the Compiler Plugin
 
 For convenience, subcut includes a compiler plugin which can be used to avoid needing to add the
@@ -371,7 +454,10 @@ correctly so check your settings.
 
 Use of the compiler plugin for subcut is completely optional. The code generated is identical to using Injectable
 with the implicit parameter for bindingModule added manually, so if you prefer not to use compiler plugins, just
-stick to Injectable and the implicit parameter.
+stick to Injectable and the implicit parameter. At present, most IDEs do not integrate compiler plugins into the
+compile cycle, so if you use AutoInjectable, you may get warnings about errors in the code in your IDE even though
+the compiler has no problem. If this bothers you, skip the compiler plugin and just put the implicit parameters
+back in your code.
 
 
 ## Integrating with other libraries
@@ -408,14 +494,14 @@ A typical test with SubCut overriding will look like this:
 
 ```scala
     test("Test lookup with mocked out services") {
-      ProjectConfiguration.modifyBindings { module =>
+      ProjectConfiguration.modifyBindings { implicit module =>  // implicit makes the test module default
         import module._
         // module now holds a mutable copy of the general bindings, which we can re-bind however we want
-        bind[Int] identifiedBy 'maxThreadPoolSize to None    // unbind and use the default
-        bind[WebSearch] toSingleInstance new FakeWebSearchService  // use a fake service defined elsewhere
-        bind[FlightLookup] toSingleInstance new FakeFlightLookup   // ditto
+        bind [Int] identifiedBy MaxThreadPoolSizeId to None    // unbind and use the default
+        bind [WebSearch] toSingleInstance new FakeWebSearchService  // use a fake service defined elsewhere
+        bind [FlightLookup] toSingleInstance new FakeFlightLookup   // ditto
 
-        val doStuff = new DoStuffOnTheWeb("test", new Date())(module)
+        val doStuff = new DoStuffOnTheWeb("test", new Date())   // test module is used implicitly
 
         doStuff.canFindMatchingFlight should be (true)
         // etc.
@@ -452,10 +538,10 @@ runtime and this can be hard to detect.
 
 There are two main ways of reducing the risk of this occuring:
 
-1. Use injectIfBound and always supply default implementations, which is better for readability anyway,
+1. Use injectOptional and always supply default implementations, which is better for readability anyway,
    and means that there will never be a BindingException thrown at runtime, and
 
-2. Test all of your instances with an empty bindingModule assuming you do use injectIfBound, or
+2. Test all of your instances with an empty bindingModule assuming you do use injectOptional, or
    alternatively bind your standard configuration module (or each module in turn) implicitly into scope,
    and then create new instances of your injectable classes. This will enable you to pick up any missing
    or misconfigured bindings at testing time, rather than in production.
@@ -465,13 +551,12 @@ safety. Most (all) other DI approaches I have seen can get runtime failures if r
 unavailable, so subcut is not all that unusual in this regard, although I have tried hard to provide
 strategies for working around the risk in practice.
 
-Finally we have been using SubCut for some time now interally at Locus Development, and it works well for
-us. I would like to thank Locus Development for their patience and support while I developed SubCut, and
-also for providing a testing ground for it. I will also remind you that SubCut is currently in pre-alpha
-(0.8) and while it works great for us, it might eat your children, blow up your servers and other
-horrible things that I am not responsible for. I would however like bug reports if it does do any of the
-above (or just plain doesn't work for some reason). The pre 1.0 tag should also serve as a reminder that
-while I will try and keep the API stable, there could well be changes that will break your code in the
-months ahead as we approach a stable 1.0 release.
+Finally I would like to thank the various contributors who made
+the 2.0 release possible, including: ptillemans, dholbrook, aerskine, iron9light, nadavwr, cessationoftime,
+artemkozlov and crispywalrus (if I missed you, sorry, I took these from the pull requests in GitHub). 
+While I could not always merge in the pull requests, all of them were greatly
+appreciated and often incorporated in some form (when I could I merged, when I couldn't I cherrypicked).
+Also, thanks to everyone who submitted bug reports, messages of support, wrote articles, badgered me to
+put out snapshots for new versions of Scala, and anything else that helped get to 2.0.
 
 Thanks, and Happy SubCutting.

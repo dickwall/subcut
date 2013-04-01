@@ -175,6 +175,7 @@ class NewBindingModule(fn: MutableBindingModule => Unit) extends BindingModule {
  * <pre>
  * import NewBindingModule._
  * implicit val bindingModule = newBindingModule { module =>
+ *    import module._
  *    bind [DBLookup] toProvider { module => new MySQLLookup(module) } // could use implicit module => instead
  *    bind [WebService] to newInstanceOf [RealWebService]
  *    bind [Int] identifiedBy 'maxPoolSize toSingle 10   // could also use idBy instead of identifiedBy

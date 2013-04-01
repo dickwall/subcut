@@ -5,8 +5,8 @@ SubCut, or Scala Uniquely Bound Classes Under Traits, is a mix of service locato
 injection patterns designed to provide an idiomatic way of providing configured dependencies to scala
 applications. It is not a full inversion of control solution like Spring, but instead provides flexible
 and nearly invisible binding of traits to instances, classes or provider methods, along with a convenient
-binding DSL (Domain Specific Language) and an emphasis on immutability, compile time type safety, and
-convenience for developers.
+binding DSL (Domain Specific Language) and an emphasis on convenience for developers, compile time performance, 
+compile time type safety and immutability.
 
 It is also small (a few hundred lines of code) and has no dependencies other than the Scala runtime
 libraries (plus scalatest and junit if you want to build from source and run the tests).

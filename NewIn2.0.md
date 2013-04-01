@@ -7,9 +7,11 @@
   with any class that has a default constructor now, or with any class that has a single implicit binding module
   constructor parameter.
 
-* Also, bind [X] to newInstanceOf [Y] now works correctly, and this is how you can bind trait X to a new
-  reflectively created instance of Y each time. Note also see bind [X] to moduleInstanceOf [Y] below for
-  a module-specific singleton.
+* Also, `bind [X] to newInstanceOf [Y]` now works correctly, and this is how you can bind trait X to a new
+  reflectively created instance of Y each time. Note also see `bind [X] to moduleInstanceOf [Y]` below for
+  a module-specific singleton. Note that the whole `import com.escalatesoft.subcut.inject._` is required to
+  use these newInstanceOf and moduleInstanceOf methods as they are convenience methods defined in the
+  package object for inject.
 
 * the form
 
@@ -17,10 +19,10 @@
   bind [X] toClass [Y]
   ```
 
-  has been deprecated in favor of either "to newInstanceOf[Y]" or "to moduleInstanceOf[Y]" instead. They are
-  more expressive, and toClass [Y] often messed up scala's semicolon inference anyway.
+  has been deprecated in favor of either `to newInstanceOf [Y]` or `to moduleInstanceOf [Y]` instead. They are
+  more expressive, and `toClass [Y]` often messed up scala's semicolon inference anyway.
 
-* Re-settable singleton bindings when modules are altered: one problem with subcut 1.0 is that once a
+* Re-settable singleton bindings when modules are altered (module singleton): one problem with subcut 1.0 is that once a
   lazy binding had been evaluated, it always had that value even if you altered the module - traits
   could be explicitly re-bound, but in some cases other instances that were injected with those re-bound
   values were not updated, so they had the old instance with the old inner binding still in it. In subcut
@@ -64,16 +66,35 @@
   the lazy binding is reset so you will get a new singleton (with potentially a difference configuration) within
   that module when you first use it.
 
+* BindingId provides a new typesafe and IDE friendly way of providing binding IDs. While strings and symbols still
+  work, they will be deprecated in time. The new recommended way of doing binding IDs is this:
+
+  ```scala
+  import com.escalatesoft.subcut.inject._  // must import the whole package at present
+
+  object BindingKeys {        // optional to have a containing object, but keeps them organized
+      object WebServiceURLId extends BindingId
+      object FoobarId extends BindingId
+      object MaxPoolSizeId extends BindingId
+  }
+  ```
+
+  The resulting IDs can be used in an idBy, e.g.: `bind [X] idBy WebServiceURLId toSingle webServiceInstance` and
+  in the injects, e.g.: `injectOptional [X](WebServiceURLId) getOrElse { new AlternativeImpl }`. Only BindingIds
+  maybe used in these methods (or symbols or strings for now, soon to be deprecated). The IDE helps you complete
+  them and the compiler catches misspellings or uses that are not BindingIds, a win all around.
+
 * A new convenient syntax for creating a binding module that will be assigned to a val (rather than making an
   object to hold the configuration). Use it like this:
 
   ```scala
   import NewBindingModule._       // import the newBindingModule convenience function
   implicit val bindingModule = newBindingModule { implicit module =>   // look ma - no object!
-     bind [DBLookup] toProvider { module => new MySQLLookup(module) }
-     bind [WebService] to newInstanceOf[RealWebService]
-     bind [Int] identifiedBy 'maxPoolSize toSingle 10   // could also use idBy instead of identifiedBy
-     bind [QueryService] to moduleInstanceOf[SlowInitQueryService]
+      import module._
+      bind [DBLookup] toProvider { module => new MySQLLookup(module) }
+      bind [WebService] to newInstanceOf [RealWebService]
+      bind [Int] idBy MaxPoolSizeId toSingle 10   // could also use identifiedBy instead of idBy
+      bind [QueryService] to moduleInstanceOf [SlowInitQueryService]
   }
   ```
 
@@ -82,8 +103,8 @@
 
   ```scala
   object MyBindings extends NewBindingModule({ implicit module =>
-    module.bind [Z] toSingle new SomeClass
-  }
+      module.bind [Z] toSingle new SomeClass
+  })
   ```
 
   This is no longer a recommended practice, because the module used by the compiler to satisfy the implicit is
@@ -92,8 +113,8 @@
 
   ```scala
   object MyBindings extends NewBindingModule( module => {       // note { no longer next to ( either - more readable
-    module.bind [Z] toSingle new SomeClass
-  }
+      module.bind [Z] toSingle new SomeClass
+  })
   ```
 
   and if SomeClass needs a binding module, you should consider not using toSingle at all, try toModuleSingle instead
@@ -101,7 +122,7 @@
 
   ```scala
   object MyBindings extends NewBindingModule( module => {
-    module.bind [Z] toModuleSingle { implicit module => new SomeClass } // implicit here late binds the module
-  }
+      module.bind [Z] toModuleSingle { implicit module => new SomeClass } // implicit here late binds the module
+  })
   ```
   

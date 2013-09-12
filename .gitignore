@@ -10,3 +10,9 @@ project/plugins/src_managed
 .ensime
 .ensime_port
 project
+
+# Eclipse
+.classpath
+.project
+.settings
+.cache

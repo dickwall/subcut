@@ -167,7 +167,7 @@ than referring to the module this binding is being defined in, since others may 
 later).
 
 The Int identified by MaxThreadPoolSizeId will always return the Int value 10 when used. Note that while
-you can bind common types like Int and String without an identifying name, doing do is not recommended
+you can bind common types like Int and String without an identifying name, doing so is not recommended
 since the resulting binding will be very broad and could be picked up accidentally.
 
 The final binding, trait WebSearch is bound lazily to a module singleton obtained by the provided method.

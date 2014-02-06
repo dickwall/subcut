@@ -60,7 +60,7 @@ object StandardConfiguration extends NewBindingModule({ module =>
   bind [String] idBy 'version toSingle "1.3"
 })
 
-class FromProperties extends BindingModule {
+class FromProperties extends BindingModule with WithoutConfigPropertySource {
   val bindings = {
     val newMod = new NewBindingModule({ module =>
       import module._

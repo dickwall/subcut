@@ -68,7 +68,7 @@ class InjectionTest extends FunSuite with ShouldMatchers with SeveredStackTraces
   }
 }
 
-object TrialBindingModule extends MutableBindingModule {
+object TrialBindingModule extends MutableBindingModule with WithoutConfigPropertySource {
   bind [TestTrait] toProvider { new TestImpl }
   bind [TestTrait] identifiedBy 'testConfig toProvider (new AlternativeImpl)
   bind [TestTrait] identifiedBy "something else" toProvider { new AlternativeImpl }

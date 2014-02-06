@@ -14,8 +14,16 @@ class PropertiesConfigPropertySource(properties: Properties) extends ConfigPrope
   }
 }
 
+class PropertiesConfigMapSource(properties: Map[String, String]) extends ConfigPropertySource {
+  def getOptional(propertyName: String) : ConfigProperty = properties.get(propertyName) match {
+      case Some(prop) =>  Defined(propertyName, prop)
+      case None =>  Undefined(propertyName)
+    }
+}
+
 object PropertiesConfigPropertySource {
   def apply(properties: Properties) = new PropertiesConfigPropertySource(properties)
+  def apply(properties: Map[String, String]) = new PropertiesConfigMapSource(properties)
 
   def fromPath(path: String) = {
     val properties = new Properties()

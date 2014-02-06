@@ -38,7 +38,7 @@ class PropertiesConfigPropertySourceTest extends FunSuite with ShouldMatchers {
   test("should load from classpath") {
     implicit val propertySource = PropertiesConfigPropertySource.fromClasspathResource("test.properties")
 
-    implicit val bindingModule = newBindingModuleWithConfig 
+    implicit val bindingModule = newBindingModuleWithConfig
 
     val configReaderInstance = new ToInject
 
@@ -49,6 +49,15 @@ class PropertiesConfigPropertySourceTest extends FunSuite with ShouldMatchers {
     implicit val propertySource = PropertiesConfigPropertySource.fromPath("src/test/resources/test.properties")
 
     implicit val bindingModule = newBindingModuleWithConfig
+
+    val configReaderInstance = new ToInject
+
+    configReaderInstance.properties should equal (List("value1", 2, 3l, 4.0))
+  }
+
+  test("should work without implicit too") {
+
+    implicit val bindingModule = newBindingModuleWithConfig(PropertiesConfigPropertySource.fromPath("src/test/resources/test.properties"))
 
     val configReaderInstance = new ToInject
 

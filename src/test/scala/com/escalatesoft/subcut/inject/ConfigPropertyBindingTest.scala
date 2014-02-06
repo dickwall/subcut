@@ -17,12 +17,6 @@ import scala.concurrent.duration._
 @RunWith(classOf[JUnitRunner])
 class ConfigPropertyBindingTest extends FunSuite with ShouldMatchers {
 
-  def configProvider(properties: Map[String, String]) = new ConfigPropertySource {
-    def getOptional(propertyName: String) : ConfigProperty = properties.get(propertyName) match {
-      case Some(value) => Defined(propertyName, value)
-      case None => Undefined(propertyName)
-    }
-  }
 
   test("Should inject from config") {
     class ToInject(implicit val bindingModule: BindingModule) extends Injectable {
@@ -32,7 +26,7 @@ class ConfigPropertyBindingTest extends FunSuite with ShouldMatchers {
       def properties: List[Any] = List(property1, property2)
     }
 
-    implicit val propertyProvider = configProvider {
+    implicit val propertyProvider = PropertiesConfigPropertySource {
       Map( "property1" -> "value1", "property2" -> "value2")
     }
     implicit val bindingModule = newBindingModuleWithConfig
@@ -52,7 +46,7 @@ class ConfigPropertyBindingTest extends FunSuite with ShouldMatchers {
       def properties: List[Any] = List(property1, property2, property3, property4)
     }
 
-    implicit val propertyProvider = configProvider {
+    implicit val propertyProvider = PropertiesConfigPropertySource {
       Map( "property1" -> "value1", "property2" -> "2", "property3" -> "3", "property4" -> "4.0")
     }
     implicit val bindingModule = newBindingModuleWithConfig { bindingModule => }
@@ -72,7 +66,7 @@ class ConfigPropertyBindingTest extends FunSuite with ShouldMatchers {
       def properties: List[Any] = List(property1, property2, property3, property4)
     }
 
-    implicit val propertyProvider = configProvider {
+    implicit val propertyProvider = PropertiesConfigPropertySource {
       Map( "property1" -> "value1", "property2" -> "2", "property3" -> "3", "property4" -> "4.0")
     }
 
@@ -99,7 +93,7 @@ class ConfigPropertyBindingTest extends FunSuite with ShouldMatchers {
       def properties: List[Any] = List(property1, property2)
     }
 
-    implicit val propertyProvider = configProvider {
+    implicit val propertyProvider = PropertiesConfigPropertySource {
       Map( "property1" -> "100")
     }
 
@@ -118,7 +112,7 @@ class ConfigPropertyBindingTest extends FunSuite with ShouldMatchers {
       val property2 = injectProperty[Date]("property2")
     }
 
-    implicit val propertyProvider = configProvider {
+    implicit val propertyProvider = PropertiesConfigPropertySource {
       Map( "property1" -> "2014-01-15", "property2" -> "2014-01-15")
     }
 
@@ -134,7 +128,47 @@ class ConfigPropertyBindingTest extends FunSuite with ShouldMatchers {
     configReaderInstance.property2 should equal (new SimpleDateFormat("yyyy-mm-DD").parse("2014-01-15"))
   }
 
+  test("Operators on binding modules are bringing around the config properties provider - modifyBindings") {
+    class ToInject(implicit val bindingModule: BindingModule) extends Injectable {
+      val property1 = inject[String]("property1")
+      val property2 = inject[Int]("property2")
+      val property3 = inject[Long]("property3")
+      val property4 = inject[Float]("property4")
+
+      def properties: List[Any] = List(property1, property2, property3, property4)
+    }
+
+    implicit val propertyProvider = PropertiesConfigPropertySource {
+      Map( "property1" -> "value1", "property2" -> "2", "property3" -> "3", "property4" -> "4.0")
+    }
+
+    implicit val bindingModule = newBindingModuleWithConfig { bindingModule =>
+      import bindingModule._
+      import BasicPropertyConversions._
+
+      bind [String] idBy 'property1 toProperty "property1"
+      bind [Int] idBy 'property2 toProperty "property2"
+      bind [Long] idBy 'property3 toProperty "property3"
+      bind [Float] idBy 'property4 toProperty "property4"
+    }
+
+    bindingModule modifyBindings { implicit bindingModule =>
+      import bindingModule._
+
+      bind [String] idBy 'property1 toSingle "value1-MODIFIED"
+
+      val configReaderInstance = new ToInject
+
+      configReaderInstance.properties should equal (List("value1-MODIFIED", 2, 3l, 4.0))
+    }
+  }
+
   test("You can write more esoteric conversion using property name") {
+    class ToInject(implicit val bindingModule: BindingModule) extends Injectable {
+      val timeout1 = injectProperty[Duration]("timeout.millis")
+      val timeout2 = inject[Duration]("timeout2")
+    }
+
     implicit def toDuration(prop: ConfigProperty): Duration = {
       val amount: Long = prop.value.toLong
       val timeQualifier: String = prop.name.split('.').last
@@ -146,12 +180,7 @@ class ConfigPropertyBindingTest extends FunSuite with ShouldMatchers {
       }
     }
 
-    class ToInject(implicit val bindingModule: BindingModule) extends Injectable {
-      val timeout1 = injectProperty[Duration]("timeout.millis")
-      val timeout2 = inject[Duration]("timeout2")
-    }
-
-    implicit val propertyProvider = configProvider {
+    implicit val propertyProvider = PropertiesConfigPropertySource {
       Map( "timeout.millis" -> "100", "timeout.seconds" -> "20")
     }
 

@@ -10,7 +10,6 @@ import scala.collection._
 import com.escalatesoft.subcut.inject.config._
 import com.escalatesoft.subcut.inject.config.Undefined
 import scala.Some
-import com.escalatesoft.subcut.inject.BindingKey
 import com.escalatesoft.subcut.inject.config.Defined
 
 /**
@@ -19,6 +18,16 @@ import com.escalatesoft.subcut.inject.config.Defined
 private[inject] case class BindingKey[A](m: Manifest[A], name: Option[String])
 
 
+trait ConfigPropertySourceProvider {
+  def configPropertySource: ConfigPropertySource
+}
+
+trait WithoutConfigPropertySource extends ConfigPropertySourceProvider {
+    def configPropertySource: ConfigPropertySource = new ConfigPropertySource {
+      def getOptional(propertyName: String): ConfigProperty = throw new IllegalStateException("No ConfigPropertySource provided")
+    }
+}
+
 
 /**
  * The main BindingModule trait.
@@ -26,14 +35,10 @@ private[inject] case class BindingKey[A](m: Manifest[A], name: Option[String])
  * (recommended - the result will be immutable) or a MutableBindingModule (not recommended unless you know what
  * you are doing and take on the thread safety responsibility yourself).
  */
-trait BindingModule { outer =>
+trait BindingModule extends ConfigPropertySourceProvider { outer : ConfigPropertySourceProvider =>
 
   /** Abstract binding map definition */
   def bindings: immutable.Map[BindingKey[_], Any]
-
-  def configPropertySource: ConfigPropertySource = new ConfigPropertySource {
-    def getOptional(propertyName: String): ConfigProperty = throw new IllegalStateException("No ConfigPropertySource provided")
-  }
 
   /**
    * Merge this module with another. The resulting module will include all bindings from both modules, with this
@@ -55,6 +60,8 @@ trait BindingModule { outer =>
           case notLmip =>
             key -> notLmip
         }}).toMap
+
+      def configPropertySource: ConfigPropertySource = outer.configPropertySource
     }
   }
 
@@ -77,6 +84,8 @@ trait BindingModule { outer =>
   def modifyBindings[A](fn: MutableBindingModule => A): A = {
     val mutableBindings = new MutableBindingModule {
       bindings = outer.bindings
+
+      def configPropertySource: ConfigPropertySource = outer.configPropertySource
     }
     fn(mutableBindings)
   }
@@ -172,6 +181,7 @@ trait BindingModule { outer =>
     }
 }
 
+
 /**
  * A class to create a new, immutable, binding module. In order to work, the constructor of this class
  * takes a function to evaluate, and passes this on to a bindings method which can be used to resolve
@@ -194,16 +204,24 @@ trait BindingModule { outer =>
  * you want. The module will be frozen after creation of the bindings, but is mutable for the
  * time you are defining it with the DSL.
  */
-class NewBindingModule(fn: MutableBindingModule => Unit) extends BindingModule {
+class NewBindingModule(fn: MutableBindingModule => Unit) extends BindingModule with WithoutConfigPropertySource {
   lazy val bindings = {
-    val module = new Object with MutableBindingModule
+    val module = new Object with MutableBindingModule with WithoutConfigPropertySource
     fn(module)
     module.freeze().fixed.bindings
   }
 }
 
-class NewBindingModuleWithConfig(fn: MutableBindingModule => Unit)(implicit configProvider: ConfigPropertySource) extends NewBindingModule(fn)  {
+class NewBindingModuleWithConfig(fn: MutableBindingModule => Unit)(implicit configProvider: ConfigPropertySource) extends BindingModule  {
   override val configPropertySource = configProvider
+
+  lazy val bindings = {
+    val module = new Object with MutableBindingModule {
+      def configPropertySource: ConfigPropertySource = configProvider
+    }
+    fn(module)
+    module.freeze().fixed.bindings
+  }
 }
 
 /**
@@ -288,6 +306,7 @@ trait MutableBindingModule extends BindingModule { outer =>
   def fixed: BindingModule = {
     new BindingModule {
       override val bindings = outer._bindings
+      def configPropertySource: ConfigPropertySource = outer.configPropertySource
     }
   }
 

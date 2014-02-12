@@ -1,5 +1,7 @@
 package com.escalatesoft.subcut
 
+import scala.language.implicitConversions
+
 /**
  * Created by IntelliJ IDEA.
  * User: Dick Wall

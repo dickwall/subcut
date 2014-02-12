@@ -1,6 +1,6 @@
 package com.escalatesoft.subcut.inject
 
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import org.scalatest.{FunSuite, SeveredStackTraces}
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
@@ -13,13 +13,13 @@ import org.junit.runner.RunWith
  */
 
 @RunWith(classOf[JUnitRunner])
-class InjectConfigValuesTest extends FunSuite with ShouldMatchers with SeveredStackTraces {
+class InjectConfigValuesTest extends FunSuite with Matchers with SeveredStackTraces {
   test("inject some default configuration values using all bound") {
     implicit val bindings = ConfigValueModule
     val config1 = new ConfigValueInstance
     config1.poolSize should be (20)
     config1.minPoolSize should be (10)
-    config1.threshold should be (0.2 plusOrMinus (0.0001))
+    config1.threshold should be (0.2 +- (0.0001))
     config1.theInt should be (1)
     config1.theOtherInt should be (2)
   }
@@ -32,7 +32,7 @@ class InjectConfigValuesTest extends FunSuite with ShouldMatchers with SeveredSt
       val config1 = new ConfigValueInstance
       config1.poolSize should be (30)
       config1.minPoolSize should be (5)
-      config1.threshold should be (0.2 plusOrMinus (0.0001))
+      config1.threshold should be (0.2 +- (0.0001))
       config1.theInt should be (1)
       config1.theOtherInt should be (2)
     }

@@ -1,7 +1,7 @@
 package com.escalatesoft.subcut.inject
 
 import NewBindingModule.newBindingModule
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import org.scalatest.FunSuite
 
 
@@ -12,7 +12,7 @@ import org.scalatest.FunSuite
  * Time: 2:11 PM
  * Test the interplay between BindingId objects, symbols and Strings to make sure they all interoperate as expected
  */
-class BindingIdObjectsTest extends FunSuite with ShouldMatchers {
+class BindingIdObjectsTest extends FunSuite with Matchers {
 
   test ("Interop of String bindings should be compatible") {
     implicit val bm = newBindingModule { module =>

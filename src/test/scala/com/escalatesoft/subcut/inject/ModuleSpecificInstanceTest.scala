@@ -1,6 +1,6 @@
 package com.escalatesoft.subcut.inject
 
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import org.scalatest.FunSuite
 
 /**
@@ -11,7 +11,7 @@ import org.scalatest.FunSuite
  * To change this template use File | Settings | File Templates.
  */
 
-class ModuleSpecificInstanceTest extends FunSuite with ShouldMatchers {
+class ModuleSpecificInstanceTest extends FunSuite with Matchers {
   test ("module specific reflective instances") {
     implicit val bm = DogSnakeModule
 

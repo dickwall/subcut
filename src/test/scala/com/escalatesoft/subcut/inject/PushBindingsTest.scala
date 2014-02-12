@@ -1,6 +1,6 @@
 package com.escalatesoft.subcut.inject
 
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import org.scalatest.{FunSuite, SeveredStackTraces}
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
@@ -23,7 +23,7 @@ class SomeTestClass extends Injectable with PushBindingsTestInjections {
 
 
 @RunWith(classOf[JUnitRunner])
-class PushBindingsTest extends FunSuite with ShouldMatchers with SeveredStackTraces {
+class PushBindingsTest extends FunSuite with Matchers with SeveredStackTraces {
 
   test("Just using the standard bindings") {
     val tc = new SomeTestClass

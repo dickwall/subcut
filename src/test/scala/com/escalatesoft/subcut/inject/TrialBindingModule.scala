@@ -8,12 +8,12 @@ package com.escalatesoft.subcut.inject
  */
 
 import org.scalatest.{SeveredStackTraces, FunSuite}
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class InjectionTest extends FunSuite with ShouldMatchers with SeveredStackTraces {
+class InjectionTest extends FunSuite with Matchers with SeveredStackTraces {
 
   test("Create an object with injected resources") {
     class SomeInjectedStuff extends Injectable with BoundToTrial {

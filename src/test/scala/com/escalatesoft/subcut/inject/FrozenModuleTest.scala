@@ -1,6 +1,6 @@
 package com.escalatesoft.subcut.inject
 
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import org.scalatest.{FunSuite, SeveredStackTraces}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -13,7 +13,7 @@ import org.scalatest.junit.JUnitRunner
  */
 
 @RunWith(classOf[JUnitRunner])
-class FrozenModuleTest extends FunSuite with ShouldMatchers with SeveredStackTraces {
+class FrozenModuleTest extends FunSuite with Matchers with SeveredStackTraces {
   test("No binding in the module") {
     intercept[BindingException] {
       val mathFuncInjected = new MathFuncInjected

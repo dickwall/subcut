@@ -1,12 +1,12 @@
 package com.escalatesoft.subcut.inject
 
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import org.scalatest.{FunSuite, SeveredStackTraces}
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 
 @RunWith(classOf[JUnitRunner])
-class InstanceProviderTest extends FunSuite with ShouldMatchers {
+class InstanceProviderTest extends FunSuite with Matchers {
 
   test("NewInstanceProvider should provide a new instance each time instance property is accessed") {  
     object InstanceCounter extends GlobalCounter
@@ -29,8 +29,8 @@ class InstanceProviderTest extends FunSuite with ShouldMatchers {
     val p = new LazyInstanceProvider(() => {new InstanceVerifier})
     val ia = p.instance
     val ib = p.instance 
-    ia.count should be === (ib.count)
-  }   
+    ia.count should be (ib.count)
+  }
 
   test("ClassInstanceProvider should provide a new instance each time instance method is called") {             
     val p = new ClassInstanceProvider[ClassInstanceProviderVerifier](classOf[ClassInstanceProviderVerifier].asInstanceOf[Class[Any]])
@@ -39,7 +39,7 @@ class InstanceProviderTest extends FunSuite with ShouldMatchers {
     val ia = p.newInstance[ClassInstanceProviderVerifier](bindingModule)
     val ib = p.newInstance[ClassInstanceProviderVerifier](bindingModule)
     ia.count should be < (ib.count)
-  } 
+  }
 
 }
 

@@ -1,7 +1,7 @@
 package com.escalatesoft.subcut.inject
 
 import org.scalatest.FunSuite
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
@@ -14,7 +14,7 @@ import org.scalatest.junit.JUnitRunner
  */
 
 @RunWith(classOf[JUnitRunner])
-class MergedModulesLateBindingTest extends FunSuite with ShouldMatchers {
+class MergedModulesLateBindingTest extends FunSuite with Matchers {
 
   test ("provider manufacturing configuration") {
     implicit val bm = RobotProviderModule

@@ -1,6 +1,6 @@
 package com.escalatesoft.subcut.inject
 
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import org.scalatest.{SeveredStackTraces, FunSuite}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -14,7 +14,7 @@ import java.beans.BeanInfo
  */
 
 @RunWith(classOf[JUnitRunner])
-class ConstructorInjectionTest extends FunSuite with ShouldMatchers with SeveredStackTraces {
+class ConstructorInjectionTest extends FunSuite with Matchers with SeveredStackTraces {
   test("Use defined binding, supply no constructor parameter") {
     implicit val bindings = AnimalModule
     val ad = new AnimalDomain

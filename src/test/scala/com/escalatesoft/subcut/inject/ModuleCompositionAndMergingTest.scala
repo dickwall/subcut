@@ -1,6 +1,6 @@
 package com.escalatesoft.subcut.inject
 
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import org.scalatest.{FunSuite, SeveredStackTraces}
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
@@ -14,7 +14,7 @@ import io.Source
  */
 
 @RunWith(classOf[JUnitRunner])
-class ModuleCompositionAndMergingTest extends FunSuite with ShouldMatchers with SeveredStackTraces {
+class ModuleCompositionAndMergingTest extends FunSuite with Matchers with SeveredStackTraces {
 
   test("Modules should be composable the :: operator") {
     implicit def billsBindings = MediumGardenModule andThen LawnModule andThen LarchModule

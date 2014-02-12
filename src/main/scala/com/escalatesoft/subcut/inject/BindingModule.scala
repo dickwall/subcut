@@ -159,7 +159,8 @@ trait BindingModule { outer =>
  * you want. The module will be frozen after creation of the bindings, but is mutable for the
  * time you are defining it with the DSL.
  */
-class NewBindingModule(fn: MutableBindingModule => Unit) extends BindingModule {
+@SerialVersionUID(1L)
+class NewBindingModule(fn: MutableBindingModule => Unit) extends BindingModule with Serializable {
   lazy val bindings = {
     val module = new Object with MutableBindingModule
     fn(module)

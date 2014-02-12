@@ -38,8 +38,8 @@ pomExtra := (
   <url>http://github.com/dickwall/subcut</url>
   <licenses>
     <license>
-      <name>BSD-style</name>
-      <url>http://www.opensource.org/licenses/bsd-license.php</url>
+      <name>Apache 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
       <distribution>repo</distribution>
     </license>
   </licenses>

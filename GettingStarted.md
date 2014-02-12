@@ -371,7 +371,7 @@ In-line merging looks like this:
 
 ```scala
 // in one location for use:
-implicit val = AppConfiguration ~ ProjectDefaults ~ CompanyDefaults
+implicit val bindingModule = AppConfiguration ~ ProjectDefaults ~ CompanyDefaults
 ```
 
 This will use bindings found in AppConfiguration first, then if a match can't be found it will look in ProjectDefaults
@@ -379,7 +379,7 @@ and finally in CompanyDefaults, and will then consider that there is no binding 
 likes to use operators in libraries, so there is a wordy equivalent:
 
 ```scala
-implicit val = AppConfiguration andThen ProjectDefaults andThen CompanyDefaults
+implicit val bindingModule = AppConfiguration andThen ProjectDefaults andThen CompanyDefaults
 ```
 
 These work identically, so just decide if you prefer ~ or andThen.
@@ -388,7 +388,7 @@ You can also reconfigure your configuration easily with this ~ merger in another
 
 ```scala
 // another configuration, in a test, say
-implicit val = TestOverrides ~ AppConfiguration ~ ProjectDefaults ~ CompanyDefaults
+implicit val bindingModule = TestOverrides ~ AppConfiguration ~ ProjectDefaults ~ CompanyDefaults
 ```
 
 There is also Module Definition merging, which looks like this:

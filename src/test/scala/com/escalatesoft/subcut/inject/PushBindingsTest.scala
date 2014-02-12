@@ -87,15 +87,15 @@ class PushBindingsTest extends FunSuite with ShouldMatchers with SeveredStackTra
 
 }
 
-object PushBindingsTestModule1 extends MutableBindingModule {
+object PushBindingsTestModule1 extends MutableBindingModule with WithoutConfigPropertySource {
   bind [BoundTrait1] toSingle new T1Impl1
 }
 
-object PushBindingsTestModule2 extends MutableBindingModule {
+object PushBindingsTestModule2 extends MutableBindingModule with WithoutConfigPropertySource {
   bind [BoundTrait2] toSingle new T2Impl1
 }
 
-object PushBindingsTestModule extends MutableBindingModule {
+object PushBindingsTestModule extends MutableBindingModule with WithoutConfigPropertySource {
   withBindingModules(PushBindingsTestModule1, PushBindingsTestModule2)
 }
 

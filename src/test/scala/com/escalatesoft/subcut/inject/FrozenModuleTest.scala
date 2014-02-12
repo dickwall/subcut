@@ -82,7 +82,7 @@ class MultFunc extends MathFunc {
   override def doIt(x: Int, y: Int): Int = x * y
 }
 
-object MathModule extends MutableBindingModule
+object MathModule extends MutableBindingModule with WithoutConfigPropertySource
 
 trait MathInjector extends BoundToModule {
   override val bindingModule = MathModule

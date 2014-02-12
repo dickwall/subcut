@@ -60,7 +60,7 @@ class PlainScalaInjectInBindingTest extends FunSuite with ShouldMatchers {
   }
   
   //all implementations unaware of framework, inject called during module definition
-  object EchoModule extends MutableBindingModule with Injectable {
+  object EchoModule extends MutableBindingModule with WithoutConfigPropertySource with Injectable {
     
     val bindingModule = this
     

@@ -1,5 +1,7 @@
 package com.escalatesoft.subcut.inject
 
+import com.escalatesoft.subcut.inject.config.{ConfigProperty, BasicPropertyConversions}
+
 /**
  * The trait that provides dependency injection features for a class or object. To use this trait,
  * Mix it in to the class or object definition, and then define the abstract bindingModule which holds
@@ -8,7 +10,7 @@ package com.escalatesoft.subcut.inject
  * or, perhaps most flexibly, an implicit constructor parameter in a curried parameter list. This last option
  * can provide flexible and mostly invisible bindings all the way down an object instance creation chain.
  */
-trait Injectable {
+trait Injectable extends BasicPropertyConversions{
   implicit def bindingModule: BindingModule
 
   /**
@@ -167,6 +169,33 @@ trait Injectable {
   def injectOptional[T <: Any](name: String)(implicit m: scala.reflect.Manifest[T]): Option[T] =
     bindingModule.injectOptional[T](Some(name))
 
+  /**
+   * Inject a required instance for the given trait as read from the ConfigPropertySource provided by the BindingModule
+   * and converted using an implicit converter from ConfigProperty (a wrapper of String properties) to the required target
+   * trait.
+   *
+   * If the module contains no configuration the injection will fail. The same will happen if the property cannot be
+   * found.
+   *
+   * Instances of ConfigPropertySource trait can be developed to allow the injection to retrieve from different sources.
+   * At the moment the only implementation available allows the use of the Java Properties class.
+   *
+   * @param propertyName The key in the ConfigPropertySource to load the property to be Inject
+   * @return An instance converted to the relevant type
+   */
+  def injectProperty[T <: Any](propertyName: String)(implicit m: scala.reflect.Manifest[T], propertyConverter: ConfigProperty => T): T =
+    bindingModule.injectPropertyMandatory[T](propertyName)
+
+  /**
+   * Inject an optional for the given trait as read from the ConfigPropertySource provided by the BindingModule
+   * and converted using an implicit converter from ConfigProperty (a wrapper of String properties) to the required target
+   * trait.. If there is no matching binding, this method will return None.
+   *
+   * @param propertyName The name of the property to be read
+   * @return An option with instance converted to the relevant type if found or None if not found
+   */
+  def injectOptionalProperty[T <: Any](propertyName: String)(implicit m: scala.reflect.Manifest[T], propertyConverter: ConfigProperty => T): Option[T] =
+    bindingModule.injectPropertyOptional[T](propertyName)
 }
 
 /**

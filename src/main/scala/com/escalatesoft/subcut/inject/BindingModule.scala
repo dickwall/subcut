@@ -7,11 +7,27 @@ package com.escalatesoft.subcut.inject
  * Time: 11:39 AM
  */
 import scala.collection._
+import com.escalatesoft.subcut.inject.config._
+import com.escalatesoft.subcut.inject.config.Undefined
+import scala.Some
+import com.escalatesoft.subcut.inject.config.Defined
 
 /**
  * The binding key, used to uniquely identify the desired injection using the class and an optional name.
  */
 private[inject] case class BindingKey[A](m: Manifest[A], name: Option[String])
+
+
+trait ConfigPropertySourceProvider {
+  def configPropertySource: ConfigPropertySource
+}
+
+trait WithoutConfigPropertySource extends ConfigPropertySourceProvider {
+    def configPropertySource: ConfigPropertySource = new ConfigPropertySource {
+      def getOptional(propertyName: String): ConfigProperty = throw new IllegalStateException("No ConfigPropertySource provided")
+    }
+}
+
 
 /**
  * The main BindingModule trait.
@@ -19,11 +35,11 @@ private[inject] case class BindingKey[A](m: Manifest[A], name: Option[String])
  * (recommended - the result will be immutable) or a MutableBindingModule (not recommended unless you know what
  * you are doing and take on the thread safety responsibility yourself).
  */
-trait BindingModule { outer =>
+trait BindingModule extends ConfigPropertySourceProvider { outer : ConfigPropertySourceProvider =>
 
   /** Abstract binding map definition */
   def bindings: immutable.Map[BindingKey[_], Any]
-  
+
   /**
    * Merge this module with another. The resulting module will include all bindings from both modules, with this
    * module winning if there are common bindings (binding override). If you prefer symbolic operators,
@@ -44,6 +60,8 @@ trait BindingModule { outer =>
           case notLmip =>
             key -> notLmip
         }}).toMap
+
+      def configPropertySource: ConfigPropertySource = outer.configPropertySource
     }
   }
 
@@ -66,6 +84,8 @@ trait BindingModule { outer =>
   def modifyBindings[A](fn: MutableBindingModule => A): A = {
     val mutableBindings = new MutableBindingModule {
       bindings = outer.bindings
+
+      def configPropertySource: ConfigPropertySource = outer.configPropertySource
     }
     fn(mutableBindings)
   }
@@ -135,7 +155,32 @@ trait BindingModule { outer =>
     for ((k, v) <- bindings) yield { k.toString + " -> " + v.toString }
   }
 
+  /**
+   * Retrieves a mandatory binding for class T for the giving property in the ConfigPropertySource owned by this module.
+   * If there is no ConfigPropertySource the binding will fail (use NewBindingModule.newBindingModuleWithConfig to create
+   * a config with ConfigPropertySource).
+   *
+   * @param propertyName The key to use to retrieve the property from the ConfigPropertySource
+   * @return The property value converted to the required type by the implicit property converter
+   */
+  def injectPropertyMandatory[T <: Any](propertyName: String)(implicit m: scala.reflect.Manifest[T], propertyConverter: ConfigProperty => T): T =
+    propertyConverter( configPropertySource.get(propertyName) )
+
+  /**
+   * Retrieves an optional binding for class T for the giving property in the ConfigPropertySource owned by this module.
+   * If there is no ConfigPropertySource the binding will fail (use NewBindingModule.newBindingModuleWithConfig to create
+   * a config with ConfigPropertySource).
+   *
+   * @param propertyName The key to use to retrieve the property from the ConfigPropertySource
+   * @return An optional property value converted to the required type by the implicit property converter
+   */
+  def injectPropertyOptional[T <: Any](propertyName: String)(implicit m: scala.reflect.Manifest[T], propertyConverter: ConfigProperty => T): Option[T] =
+    configPropertySource.getOptional(propertyName) match {
+      case property@Defined(_, _) => Some(propertyConverter(property))
+      case Undefined(_) => None
+    }
 }
+
 
 /**
  * A class to create a new, immutable, binding module. In order to work, the constructor of this class
@@ -159,9 +204,21 @@ trait BindingModule { outer =>
  * you want. The module will be frozen after creation of the bindings, but is mutable for the
  * time you are defining it with the DSL.
  */
-class NewBindingModule(fn: MutableBindingModule => Unit) extends BindingModule {
+class NewBindingModule(fn: MutableBindingModule => Unit) extends BindingModule with WithoutConfigPropertySource {
   lazy val bindings = {
-    val module = new Object with MutableBindingModule
+    val module = new Object with MutableBindingModule with WithoutConfigPropertySource
+    fn(module)
+    module.freeze().fixed.bindings
+  }
+}
+
+class NewBindingModuleWithConfig(fn: MutableBindingModule => Unit)(implicit configProvider: ConfigPropertySource) extends BindingModule  {
+  override val configPropertySource = configProvider
+
+  lazy val bindings = {
+    val module = new Object with MutableBindingModule {
+      def configPropertySource: ConfigPropertySource = configProvider
+    }
     fn(module)
     module.freeze().fixed.bindings
   }
@@ -182,9 +239,19 @@ class NewBindingModule(fn: MutableBindingModule => Unit) extends BindingModule {
  *    bind [QueryService] toSingle { new SlowInitQueryService }
  * }
  * </pre>
+ *
+ * Use the newBindingModuleWithConfig method if you need to inject from a ConfigPropertySource. That needs a
+ * ConfigPropertySource instance to be implicitly available. A version without any binding is available if you
+ * are just injecting properties using the injectProperty method
  */
 object NewBindingModule {
   def newBindingModule(fn: MutableBindingModule => Unit): BindingModule = new NewBindingModule(fn)
+
+  def newBindingModuleWithConfig(fn: MutableBindingModule => Unit)(implicit configProvider: ConfigPropertySource): BindingModule =
+    new NewBindingModuleWithConfig(fn)(configProvider)
+
+  def newBindingModuleWithConfig(implicit configProvider: ConfigPropertySource): BindingModule =
+    new NewBindingModuleWithConfig( { mutableBindingModule: MutableBindingModule => } )(configProvider)
 }
 
 /**
@@ -239,6 +306,7 @@ trait MutableBindingModule extends BindingModule { outer =>
   def fixed: BindingModule = {
     new BindingModule {
       override val bindings = outer._bindings
+      def configPropertySource: ConfigPropertySource = outer.configPropertySource
     }
   }
 
@@ -577,6 +645,22 @@ trait MutableBindingModule extends BindingModule { outer =>
     }
 
     /**
+     * Bind to a new instance of the provided class for each injection. The value for this instance is read from
+     * the ConfigPropertySource available in the BindingModule and converted using an implicitly available converter from
+     * ConfigPropertySource (essentially a wrapper for String) to the target type.
+     * Converters for the basic types are already available, you need to provide a new one for special types.
+     *
+     * @param name
+     * @param source
+     * @param converter
+     * @tparam I
+     * @return
+     */
+    def toProperty[I <: T](name: String)(implicit source: ConfigPropertySource, converter: ConfigProperty => I) {
+      toSingle( converter(source.get(name)) )
+    }
+
+    /**
      * Part of the fluent interface in the DSL, identified by provides a name to attach to the binding key so that,
      * in combination with the trait type being bound, a unique key is formed. This form takes a string name, but
      * there is an overloaded version that allows a symbol to be used instead. The symbol and string names are
@@ -622,3 +706,4 @@ trait MutableBindingModule extends BindingModule { outer =>
   // and a parameterized bind method to kick it all off
   def bind[T <: Any](implicit m: scala.reflect.Manifest[T]) = new Bind[T]()
 }
+

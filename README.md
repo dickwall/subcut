@@ -1,3 +1,32 @@
+SubCut Extended README
+=============
+
+This project is an extension of SubCut (https://github.com/dickwall/subcut) I'm keeping active while waiting for the extension
+code to be merged in the original project.
+
+I added some feature to implement injection similarly to the @value annotation in spring. For example:
+
+```(scala)
+class ToInject(implicit val bindingModule: BindingModule) extends Injectable {
+    val stringProperty = injectProperty[String]("property1")
+    val intProperty = injectProperty[Int]("property2")
+    val longProperty = injectProperty[Long]("property3")
+    val floatProperty = injectProperty[Float]("property4")
+}
+```
+
+Allowing to inject in this way:
+
+```(scala)
+{
+  implicit val bindingModule = newBindingModuleWithConfig(PropertiesConfigPropertySource.fromPath("src/test/resources/test.properties"))
+
+   val configReaderInstance = new ToInject
+}
+```
+
+It supports injection of basic types and allows generic types injection if a custom conversion function is provided.
+
 SubCut README
 =============
 

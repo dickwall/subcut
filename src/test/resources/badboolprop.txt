@@ -1,0 +1,2 @@
+some.path.[Boolean] = false
+some.bad.[Boolean] = Truee

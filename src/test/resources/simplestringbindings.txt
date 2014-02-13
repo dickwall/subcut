@@ -1,0 +1,5 @@
+bacon = eggs
+salt=pepper
+fish = chips
+run= hide
+robot = laser eyes

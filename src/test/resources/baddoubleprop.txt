@@ -1,0 +1,2 @@
+some.path.[Double] = 2
+some.bad.[Double] = two point five

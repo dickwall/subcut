@@ -1,0 +1,10 @@
+simple1 = hello
+simple2=well, hello there
+someInt.[Int] = 6
+anotherInt.[Int] = 7
+someLong.[Long] = 231
+someFloat.[Float] = 23.21
+someDouble.[Double]=25.222
+someBoolean.[Boolean]=true
+someFalseBoolean.[Boolean] = false
+someChar.[Char] = a

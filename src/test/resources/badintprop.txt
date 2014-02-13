@@ -1,0 +1,2 @@
+some.path.[Int] = 7
+some.bad.[Int] = seven

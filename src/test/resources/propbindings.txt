@@ -8,3 +8,4 @@ someDouble.[Double]=25.222
 someBoolean.[Boolean]=true
 someFalseBoolean.[Boolean] = false
 someChar.[Char] = a
+database.timeout.[Duration] = 5 seconds

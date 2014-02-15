@@ -2,7 +2,9 @@ package com.escalatesoft.subcut.inject.util
 
 import org.scalatest.{SeveredStackTraces, Matchers, FunSuite}
 import java.io.File
-import com.escalatesoft.subcut.inject.BindingException
+import com.escalatesoft.subcut.inject._
+import NewBindingModule._
+import scala.concurrent.duration.Duration
 
 /**
  * Test the property file module parsing
@@ -37,7 +39,7 @@ class PropertyFileModuleParserTest extends FunSuite with Matchers with SeveredSt
 
   test("the bindings for typed properties should be valid") {
     val bindings = PropertyFileModule(new File(getClass.getClassLoader.getResource("propbindings.txt").getFile))
-    bindings.listBindings.size should be (10)
+    bindings.listBindings.size should be (11)
     bindings.inject[String](Some("simple1")) should be ("hello")
     bindings.inject[String](Some("simple2")) should be ("well, hello there")
     bindings.inject[Int](Some("someInt")) should be (6)
@@ -48,6 +50,7 @@ class PropertyFileModuleParserTest extends FunSuite with Matchers with SeveredSt
     bindings.inject[Boolean](Some("someBoolean")) should be (true)
     bindings.inject[Boolean](Some("someFalseBoolean")) should be (false)
     bindings.inject[Char](Some("someChar")) should be ('a')
+    bindings.inject[Duration](Some("database.timeout")).toMillis should be (5000)
   }
 
   test("the bindings should be typed to the correct type and not respond to requests for other types") {
@@ -91,8 +94,6 @@ class PropertyFileModuleParserTest extends FunSuite with Matchers with SeveredSt
     def parse(propString: String): Seq[String] = propString.split(',').map(_.trim).toList
   }
 
-  case class Person(first: String, last: String, age: Int)
-
   val personParser = new PropertyParser[Person] {
     def parse(propString: String): Person = {
       val fields = propString.split(',').map(_.trim)
@@ -116,6 +117,53 @@ class PropertyFileModuleParserTest extends FunSuite with Matchers with SeveredSt
     val workingBindings = PropertyFileModule(new File(getClass.getClassLoader.getResource("custompropbindings.txt").getFile), withBothParsers)
     workingBindings.inject[Seq[String]](Some("seq.of.strings")) should be (List("hello", "there", "today"))
     workingBindings.inject[Person](Some("some.person")) should be (Person("Dick", "Wall", 25))
-    workingBindings.listBindings.size should be (12)
+    workingBindings.listBindings.size should be (13)
   }
+
+  test("an actual class injection should inject the right results when a property module is used") {
+    val withBothParsers = PropertyMappings.Standard + ("Seq[String]" -> seqStringParser) + ("Person" -> personParser)
+
+    implicit val bindings: BindingModule = newBindingModule( module => {
+      module <~ PropertyFileModule.fromResourceFile("custompropbindings.txt", withBothParsers)
+      module.bind[Person] idBy "Fred" toSingle Person("Fred", "Smith", 33)
+      module.bind[Int] idBy "aprogint" toSingle 33
+    })
+
+    val pic = new PropertyInjectedClass
+    pic.seqOfString should be (List("hello", "there", "today"))
+    pic.person should be (Person("Dick", "Wall", 25))
+    pic.simpleString should be ("hello")
+    pic.simple2String should be ("well, hello there")
+    pic.someInt should be (6)
+    pic.anotherInt should be (7)
+    pic.someLong should be (231L)
+    pic.someFloat should be (23.21F +- 0.0001F)
+    pic.someDouble should be (25.222 +- 0.0001)
+    pic.someBoolean should be (true)
+    pic.someFalseBoolean should be (false)
+    pic.someChar should be ('a')
+    pic.timeout.toMillis should be (5000)
+    pic.progBinding1 should be (Person("Fred", "Smith", 33))
+    pic.progBinding2 should be (33)
+  }
+}
+
+case class Person(first: String, last: String, age: Int)
+
+class PropertyInjectedClass(implicit val bindingModule: BindingModule) extends Injectable {
+  val seqOfString = inject[Seq[String]]("seq.of.strings")
+  val person = inject[Person]("some.person")
+  val simpleString = inject[String]("simple1")
+  val simple2String = inject[String]("simple2")
+  val someInt = inject[Int]("someInt")
+  val anotherInt = inject[Int]("anotherInt")
+  val someLong = inject[Long]("someLong")
+  val someFloat = inject[Float]("someFloat")
+  val someDouble = inject[Double]("someDouble")
+  val someBoolean = inject[Boolean]("someBoolean")
+  val someFalseBoolean = inject[Boolean]("someFalseBoolean")
+  val someChar = inject[Char]("someChar")
+  val timeout = inject[Duration]("database.timeout")
+  val progBinding1 = inject[Person]("Fred")
+  val progBinding2 = inject[Int]("aprogint")
 }

@@ -6,6 +6,7 @@ import java.io.{FileInputStream, File}
 import java.util.Properties
 import scala.collection.JavaConverters._
 import scala.language.existentials
+import scala.concurrent.duration._
 
 /**
  * Read simple value bindings from a property file for simple file-based configurations
@@ -45,6 +46,13 @@ case class PropertyFileModule(propFile: File, propertyParsers: Map[String, Prope
   }
 }
 
+object PropertyFileModule {
+  def fromResourceFile(fileName: String, propertyParsers: Map[String, PropertyParser[_]] = PropertyMappings.Standard): PropertyFileModule = {
+    val resourceFile = new File(getClass.getClassLoader.getResource(fileName).getFile)
+    PropertyFileModule(resourceFile, propertyParsers)
+  }
+}
+
 
 object PropertyMappings {
   val StringParser = new PropertyParser[String] {
@@ -75,6 +83,10 @@ object PropertyMappings {
     def parse(prop: String): Boolean = prop.toBoolean
   }
 
+  val DurationParser = new PropertyParser[Duration] {
+    def parse(prop: String): Duration = Duration(prop)
+  }
+
   val Standard: Map[String, PropertyParser[_]] = Map (
     "String" -> StringParser,
     "Int" -> IntParser,
@@ -82,7 +94,8 @@ object PropertyMappings {
     "Double" -> DoubleParser,
     "Float" -> FloatParser,
     "Boolean" -> BooleanParser,
-    "Char" -> CharParser
+    "Char" -> CharParser,
+    "Duration" -> DurationParser
   )
 }
 

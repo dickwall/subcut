@@ -1,5 +1,6 @@
+# check the standard type bindings
 simple1 = hello
-simple2=well, hello there
+simple2.[String]=well, hello there
 someInt.[Int] = 6
 anotherInt.[Int] = 7
 someLong.[Long] = 231
@@ -8,5 +9,8 @@ someDouble.[Double]=25.222
 someBoolean.[Boolean]=true
 someFalseBoolean.[Boolean] = false
 someChar.[Char] = a
+database.timeout.[Duration] = 5 seconds
+
+# some custom type bindings
 seq.of.strings.[Seq[String]] = hello, there, today
 some.person.[Person] = Wall, Dick, 25

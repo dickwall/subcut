@@ -82,53 +82,53 @@ property parsers for your own types and use those to load a property file. Fortu
 create an extension of `PropertyParser[YourTypeHere]` and then add a map entry `YourTypeHere -> newPropertyParser` to
 the PropertyMappings.Standard map when you create the PropertyFileModule to parse the file. For example:
 
-    ```scala
-    case class Person(first: String, last: String, age: Int)
+```scala
+case class Person(first: String, last: String, age: Int)
 
-    val seqStringParser = new PropertyParser[Seq[String]] {
-      def parse(propString: String): Seq[String] = propString.split(',').map(_.trim).toList
-    }
+val seqStringParser = new PropertyParser[Seq[String]] {
+  def parse(propString: String): Seq[String] = propString.split(',').map(_.trim).toList
+}
 
-    val personParser = new PropertyParser[Person] {
-      def parse(propString: String): Person = {
-        val fields = propString.split(',').map(_.trim)
-        Person(fields(1), fields(0), fields(2).toInt)
-      }
-    }
+val personParser = new PropertyParser[Person] {
+  def parse(propString: String): Person = {
+    val fields = propString.split(',').map(_.trim)
+    Person(fields(1), fields(0), fields(2).toInt)
+  }
+}
 
-    val customParserMap = PropertyMappings.Standard + ("Seq[String]" -> seqStringParser) + ("Person" -> personParser)
+val customParserMap = PropertyMappings.Standard + ("Seq[String]" -> seqStringParser) + ("Person" -> personParser)
 
-    implicit val binding = PropertyFileModule.fromResourceFile("custompropbindings.txt", customParserMap)
-    ```
+implicit val binding = PropertyFileModule.fromResourceFile("custompropbindings.txt", customParserMap)
+```
 
 The string you use in the parser map for the key should correspond to the type you will specify in the property file.
 For example, in the above code, we define parsers for `Seq[String]` and a `Person` types, so these would be specified
 in the property file like this:
 
-    ```
-    # our new custom bindings
-    seq.of.strings.[Seq[String]] = hello, there, today
-    some.person.[Person] = Wall, Dick, 25
+```
+# our new custom bindings
+seq.of.strings.[Seq[String]] = hello, there, today
+some.person.[Person] = Wall, Dick, 25
 
-    # some other standard bindings
-    simple1 = hello
-    someInt.[Int] = 6
-    ```
+# some other standard bindings
+simple1 = hello
+someInt.[Int] = 6
+```
 
 
 
 Then once the property file has loaded without errors, you can inject your custom types along with the standard ones:
 
-    ```scala
-    class PropertyInjectedClass(implicit val bindingModule: BindingModule) extends Injectable {
+```scala
+class PropertyInjectedClass(implicit val bindingModule: BindingModule) extends Injectable {
 
-      val seqOfString = inject[Seq[String]]("seq.of.strings")  // inject the Seq[String]
-      val person = inject[Person]("some.person")               // inject the Person
+  val seqOfString = inject[Seq[String]]("seq.of.strings")  // inject the Seq[String]
+  val person = inject[Person]("some.person")               // inject the Person
 
-      val simpleString = inject[String]("simple1")
-      val someInt = inject[Int]("someInt")
-    }
-    ```
+  val simpleString = inject[String]("simple1")
+  val someInt = inject[Int]("someInt")
+}
+```
 
 ## Loading files from specific paths
 
@@ -136,15 +136,15 @@ The form `PropertyFileModule.fromResourceFile(filename, mappings)` (mappings is 
 of finding a property file on the classpath and loading that, but if you want to use a specific path to a file, just use
 the standard `apply` method on `PropertyFileModule` that takes a `java.io.File` to load, e.g.:
 
-    ```scala
-    PropertyFileModule(new File("/home/user/.config/myapp/properties.txt"))
-    ```
+```scala
+PropertyFileModule(new File("/home/user/.config/myapp/properties.txt"))
+```
 
-    or using a custom mapping
+or using a custom mapping
 
-    ```scala
-    PropertyFileModule(new File("/home/user/.config/myapp/properties.txt", customMappings))
-    ```
+```scala
+PropertyFileModule(new File("/home/user/.config/myapp/properties.txt", customMappings))
+```
 
 
 

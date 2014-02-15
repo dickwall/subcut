@@ -16,6 +16,8 @@ The SubCut library is available as open source under the Apache v2 license.
 Documentation
 =============
 
+*Just Added*: [Property File Configuration](https://github.com/dickwall/subcut/blob/master/PropertyFiles.md)
+
 The scaladoc in the source code is reasonably complete, and will continue to be improved. The unit tests
 provide further code examples of how subcut can be used, but does not attempt to demonstrate recommended
 uses or effective recipes. There is a [Getting Started](https://github.com/dickwall/subcut/blob/master/GettingStarted.md) document that spells out the quickest way to get

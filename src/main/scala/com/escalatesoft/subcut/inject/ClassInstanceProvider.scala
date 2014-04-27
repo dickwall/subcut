@@ -33,10 +33,14 @@ private[inject] class ClassInstanceProvider[I <: Any](val clazz: Class[Any]) {
 }
 
 private[inject] class ClassSingleModuleProvider[I <: Any](clazz: Class[Any]) extends ClassInstanceProvider[I](clazz) {
-  private[this] val instanceMap = new mutable.HashMap[BindingModule, Any] with mutable.SynchronizedMap[BindingModule, Any]
+  private[this] val instanceMap = new java.util.concurrent.ConcurrentHashMap[BindingModule, Any]
 
-  override def newInstance[I : Manifest](module: BindingModule): I =
-    instanceMap.getOrElseUpdate(module, super.newInstance[I](module)).asInstanceOf[I]
+  override def newInstance[I : Manifest](module: BindingModule): I = {
+    if (!instanceMap.containsKey(module)) {
+      instanceMap.putIfAbsent(module, super.newInstance[I](module))
+    }
+    instanceMap.get(module).asInstanceOf[I]
+  }
 }
 
 private[inject] class LazyInstanceProvider[I <: Any](fn: () => I) {

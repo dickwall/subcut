@@ -56,14 +56,14 @@ private[inject] class LazyModuleInstanceProvider[I <: Any](module: BindingModule
 
 private[inject] class NewInstanceProvider[I <: Any](fn: () => I)(implicit m: Manifest[I]) {
   def instance: I = fn()     // create a new instance each time we ask for one
-  val boundType = m.erasure.getName
+  val boundType = m.runtimeClass.getName
 
   override def toString = "NewInstanceProvider[%s]".format(boundType)
 }
 
 private[inject] class NewBoundInstanceProvider[I <: Any](fn: BindingModule => I)(implicit m: Manifest[I]) {
   def instance(module: BindingModule): I = fn(module)   // create new instance with binding module provided
-  val boundType = m.erasure.getName
+  val boundType = m.runtimeClass.getName
 
   override def toString = "NewBoundInstanceProvider[%s]".format(boundType)
 }

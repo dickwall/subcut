@@ -94,7 +94,7 @@ trait Injectable {
       case None => // must then have a valid impltouse
         val implToUse = fn
         if (implToUse == null)
-          throw new IllegalStateException("No binding for %s, so provided impl function may not result in null".format(m.erasure.toString))
+          throw new IllegalStateException("No binding for %s, so provided impl function may not result in null".format(m.runtimeClass.toString))
         implToUse
       case Some(instance) => instance
     }
@@ -116,7 +116,7 @@ trait Injectable {
       case None => // must then have a valid impltouse
         val implToUse = fn
         if (implToUse == null)
-          throw new IllegalStateException("No binding for %s named %s, so provided impl function may not result in null".format(m.erasure.toString, name))
+          throw new IllegalStateException("No binding for %s named %s, so provided impl function may not result in null".format(m.runtimeClass.toString, name))
         implToUse
       case Some(instance) => instance
     }

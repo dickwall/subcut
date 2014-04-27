@@ -2,17 +2,17 @@ name := "subcut"
 
 organization := "com.escalatesoft.subcut"
 
-version := "2.0"
+version := "2.1"
 
-crossScalaVersions := Seq("2.9.2", "2.9.1", "2.9.0-1", "2.9.0")
+crossScalaVersions := Seq("2.11.0", "2.10.4")
 
-scalaVersion := "2.10.3"
+scalaVersion := "2.11.0"
 
 scalacOptions += "-deprecation"
 
 libraryDependencies += "junit" % "junit" % "4.5" % "test"
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "2.0" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "2.1.4" % "test"
 
 libraryDependencies <<= (scalaVersion, libraryDependencies) { (ver, deps) =>
   deps :+ "org.scala-lang" % "scala-compiler" % ver 

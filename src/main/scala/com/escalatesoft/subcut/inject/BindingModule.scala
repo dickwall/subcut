@@ -571,8 +571,8 @@ trait MutableBindingModule extends BindingModule { outer =>
     @deprecated(message="Use bind [Trait] to newInstanceOf[Impl] instead, or consider bind [Trait] to moduleInstanceOf[Impl]", "2.0")
     def toClass[I <: T](implicit m: scala.reflect.Manifest[I], t: scala.reflect.Manifest[T]) {
       name match {
-        case Some(n) => outer.bindClass[T](n, new ClassInstanceProvider[T](m.erasure.asInstanceOf[Class[Any]]))
-        case None => outer.bindClass[T](new ClassInstanceProvider[T](m.erasure.asInstanceOf[Class[Any]]))
+        case Some(n) => outer.bindClass[T](n, new ClassInstanceProvider[T](m.runtimeClass.asInstanceOf[Class[Any]]))
+        case None => outer.bindClass[T](new ClassInstanceProvider[T](m.runtimeClass.asInstanceOf[Class[Any]]))
       }
       name = None
     }

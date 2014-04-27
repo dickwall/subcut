@@ -27,7 +27,7 @@ package object inject {
    * @return a new class instance provider
    */
   def newInstanceOf[T <: Any](implicit m: scala.reflect.Manifest[T]) = {
-    new ClassInstanceProvider[T](m.erasure.asInstanceOf[Class[Any]])
+    new ClassInstanceProvider[T](m.runtimeClass.asInstanceOf[Class[Any]])
   }
 
   /**
@@ -39,7 +39,7 @@ package object inject {
    * @return a new class instance provider
    */
   def moduleInstanceOf[T <: Any](implicit m: scala.reflect.Manifest[T]) = {
-    new ClassSingleModuleProvider[T](m.erasure.asInstanceOf[Class[Any]])
+    new ClassSingleModuleProvider[T](m.runtimeClass.asInstanceOf[Class[Any]])
   }
 
   /**

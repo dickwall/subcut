@@ -94,13 +94,13 @@ For maven:
 ```xml
     <dependency>
       <groupId>com.escalatesoft.subcut</groupId>
-      <artifactId>subcut_2.10</artifactId>
-      <version>2.0</version>
+      <artifactId>subcut_2.11</artifactId>
+      <version>2.1</version>
     </dependency>
 ```
 
-replace _2.10.1 with the version of Scala you are using.
-Replace 2.0 with whatever the latest stable version of subcut is (or add -SNAPSHOT if you want a snapshot).
+replace _2.11 with the version of Scala you are using.
+Replace 2.1 with whatever the latest stable version of subcut is (or add -SNAPSHOT if you want a snapshot).
 Snapshot and release builds are available from the maven central repo.
 
 For sbt:
@@ -109,10 +109,10 @@ See the instructions for maven about versions and repo configuration. To use sub
 the dependency:
 
 ```scala
-    "com.escalatesoft.subcut" %% "subcut" % "2.0"
+    "com.escalatesoft.subcut" %% "subcut" % "2.1"
 ```
 
-replacing 2.0 with the latest (or desired) version of subcut.
+replacing 2.1 with the latest (or desired) version of subcut.
 
 
 ## Setting up a configuration module
@@ -155,7 +155,7 @@ and will then be re-used for every other request made within that module, HOWEVE
 modified, or merged in with another, or reconfigured in any way, the binding will be reset, and the next
 time Analyzer is requested, the new WebAnalyzer will be created again and used from that point on. This
 allows configuration to change in new binding modules and get picked up when that new configuration is used
-but avoids the cost of creating a new item every time. This is called Module Singleton, and it is new in 2.0.
+but avoids the cost of creating a new item every time. This is called Module Singleton, and it is new as of 2.0.
 
 Session, with the provided ID CurrentUserID, is bound to a function that will provide a Session upon each
 use of the binding. This is the most flexible option for providing instances, since the provider method
@@ -185,7 +185,7 @@ Note also that the binding module defined here is a singleton object. There is t
 it keeps things nice and simple. Define it in some package in your project that denotes configuration,
 and makes it easy to find.
 
-In Subcut 2.0 there is a new convenience method for making binding modules without needing to create
+In Subcut 2.1 there is a new convenience method for making binding modules without needing to create
 an object or class:
 
 ```scala
@@ -434,7 +434,7 @@ need to do the following:
   In sbt, use
 
 ```scala
-  addCompilerPlugin("com.escalatesoft.subcut" %% "subcut" % "2.0") // (or 2.0-SNAPSHOT right now)
+  addCompilerPlugin("com.escalatesoft.subcut" %% "subcut" % "2.1") 
 ```
   in the project build settings. In your IDE or other build environment, use the recommended method there
   to add the compiler plugin.
@@ -552,11 +552,11 @@ unavailable, so subcut is not all that unusual in this regard, although I have t
 strategies for working around the risk in practice.
 
 Finally I would like to thank the various contributors who made
-the 2.0 release possible, including: ptillemans, dholbrook, aerskine, iron9light, nadavwr, cessationoftime,
+the 2.1 release possible, including: ptillemans, dholbrook, aerskine, iron9light, nadavwr, cessationoftime,
 artemkozlov and crispywalrus (if I missed you, sorry, I took these from the pull requests in GitHub). 
 While I could not always merge in the pull requests, all of them were greatly
 appreciated and often incorporated in some form (when I could I merged, when I couldn't I cherrypicked).
 Also, thanks to everyone who submitted bug reports, messages of support, wrote articles, badgered me to
-put out snapshots for new versions of Scala, and anything else that helped get to 2.0.
+put out snapshots for new versions of Scala, and anything else that helped get to 2.1.
 
 Thanks, and Happy SubCutting.

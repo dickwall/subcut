@@ -618,6 +618,7 @@ trait MutableBindingModule extends BindingModule { outer =>
      * @param name the string name to identify the binding when used in combination with the type parameter.
      */
     def idBy(name: String) = identifiedBy(name)
+    def idBy(id: TypedBindingId[T]) = identifiedBy(id.bindingName)
   }
 
   // and a parameterized bind method to kick it all off

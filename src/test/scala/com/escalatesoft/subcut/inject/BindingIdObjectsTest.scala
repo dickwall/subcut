@@ -43,7 +43,8 @@ class BindingIdObjectsTest extends FunSuite with Matchers {
       import module._
       bind [String] idBy Mammal toSingle "Cheetah"
       bind [String] idBy Role toSingle "Run"
-      bind [String] idBy Vehicle toSingle "Gallop"
+//      bind [String] idBy Vehicle toSingle "Gallop"
+      bind [String] idBy PoolSize toSingle "Gallop"
     }
 
     val mtd = new Speedway
@@ -55,6 +56,7 @@ class BindingIdObjectsTest extends FunSuite with Matchers {
 object Vehicle extends BindingId
 object Role extends BindingId
 object Mammal extends BindingId
+object PoolSize extends TypedBindingId[Int]
 
 class Speedway(implicit val bindingModule: BindingModule) extends Injectable {
   val mammal = inject[String](Mammal)

@@ -1,6 +1,8 @@
 SubCut Extended README
 =============
 
+THE MOST RECENT VERSION OF SUBCUT ADDED SUPPORT FOR PROPERTY INJECTION SO I'M GOING TO STOP ANY SUPPORT FOR THIS PROJECT.
+
 This project is an extension of SubCut (https://github.com/dickwall/subcut) I'm keeping active while waiting for the extension
 code to be merged in the original project.
 

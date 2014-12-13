@@ -5,13 +5,10 @@ import org.scalatest.matchers.ShouldMatchers
 
 import NewBindingModule._
 import com.escalatesoft.subcut.inject.config._
-import com.escalatesoft.subcut.inject.config.Defined
-import scala.Some
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import java.util.Date
 import java.text.SimpleDateFormat
-import scala.concurrent.duration.Duration
 import scala.concurrent.duration._
 
 @RunWith(classOf[JUnitRunner])
@@ -85,7 +82,7 @@ class ConfigPropertyBindingTest extends FunSuite with ShouldMatchers {
     configReaderInstance.properties should equal (List("value1", 2, 3l, 4.0))
   }
 
-  test("Should optinally bind properties from config source") {
+  test("Should optionally bind properties from config source") {
     class ToInject(implicit val bindingModule: BindingModule) extends Injectable {
       val property1 = injectOptionalProperty[Int]("property1") getOrElse(-1)
       val property2 = injectOptionalProperty[Int]("property2") getOrElse(-1)
@@ -194,5 +191,17 @@ class ConfigPropertyBindingTest extends FunSuite with ShouldMatchers {
 
     configReaderInstance.timeout1 should equal (100.milliseconds)
     configReaderInstance.timeout2 should equal (20.seconds)
+  }
+
+  test("you can use config source to directly access properties too") {
+    import BasicPropertyConversions._
+
+    val config = PropertiesConfigPropertySource {
+      Map( "intProp" -> "3", "doubleProp" -> "4.0")
+    }
+
+    config.getOptional("intProp").valueAs[Int] should equal (Some(3))
+    config.getOptional("doubleProp").valueAs[Double] should equal (Some(4.0))
+    config.getOptional("otherProp").valueAs[Double] should equal (None)
   }
 }

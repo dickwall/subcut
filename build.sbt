@@ -1,10 +1,10 @@
-name := "subcut"
+name := "subcut_ext"
 
-organization := "com.escalatesoft.subcut"
+organization := "com.pragmasoft"
 
-version := "2.0"
+version := "2.1"
 
-crossScalaVersions := Seq("2.10.0", "2.9.2", "2.9.1", "2.9.0-1", "2.9.0")
+crossScalaVersions := Seq("2.10.0", "2.11.1")
 
 scalaVersion := "2.10.1"
 
@@ -12,7 +12,7 @@ scalacOptions += "-deprecation"
 
 libraryDependencies += "junit" % "junit" % "4.5" % "test"
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "1.9.1" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "2.1.3" % "test"
 
 libraryDependencies <<= (scalaVersion, libraryDependencies) { (ver, deps) =>
   deps :+ "org.scala-lang" % "scala-compiler" % ver 
@@ -53,4 +53,14 @@ pomExtra := (
       <name>Dick Wall</name>
       <url>http://about.me/dickwall</url>
     </developer>
-  </developers>)
+    <developer>
+      <id>galarragas</id>
+      <name>Stefano Galarraga</name>
+    </developer>
+  </developers>
+    <repositories>
+      <repository>
+        <id>conjars.org</id>
+        <url>http://conjars.org/repo/</url>
+      </repository>
+    </repositories>)

@@ -6,7 +6,7 @@
 
     <groupId>com.pragmasoft</groupId>
     <artifactId>subcut_ext</artifactId>
-    <version>2.0</version>
+    <version>2.1</version>
 
     <properties>
         <scala.version>2.10.1</scala.version>

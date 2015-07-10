@@ -2,8 +2,6 @@ package com.escalatesoft.subcut.inject
 
 import org.scalatest.FunSuite
 import org.scalatest.Matchers
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 
 /**
  * Created with IntelliJ IDEA.
@@ -13,7 +11,6 @@ import org.scalatest.junit.JUnitRunner
  * To change this template use File | Settings | File Templates.
  */
 
-@RunWith(classOf[JUnitRunner])
 class MergedModulesLateBindingTest extends FunSuite with Matchers {
 
   test ("provider manufacturing configuration") {

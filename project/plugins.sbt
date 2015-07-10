@@ -1,7 +1,5 @@
-resolvers += "sbt-idea-repo" at "http://mpeltonen.github.com/maven/"
+addSbtPlugin("com.github.gseitz" % "sbt-release" % "1.0.0")
 
-addSbtPlugin("com.github.mpeltonen" % "sbt-idea" % "1.5.2")
+resolvers += "jgit-repo" at "http://download.eclipse.org/jgit/maven"
 
-resolvers += Classpaths.typesafeResolver
-
-addSbtPlugin("com.typesafe.sbteclipse" % "sbteclipse-plugin" % "2.4.0")
+addSbtPlugin("me.lessis" % "bintray-sbt" % "0.3.0")

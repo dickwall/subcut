@@ -2,8 +2,6 @@ package com.escalatesoft.subcut.inject
 
 import org.scalatest.Matchers
 import org.scalatest.{FunSuite, SeveredStackTraces}
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
 
 /*
  * Created by IntelliJ IDEA.
@@ -22,7 +20,6 @@ class SomeTestClass extends Injectable with PushBindingsTestInjections {
 }
 
 
-@RunWith(classOf[JUnitRunner])
 class PushBindingsTest extends FunSuite with Matchers with SeveredStackTraces {
 
   test("Just using the standard bindings") {

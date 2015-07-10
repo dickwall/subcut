@@ -2,8 +2,6 @@ package com.escalatesoft.subcut.inject
 
 import org.scalatest.Matchers
 import org.scalatest.{SeveredStackTraces, FunSuite}
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import NewBindingModule._
 
 /**
@@ -13,7 +11,6 @@ import NewBindingModule._
  * Time: 6:28 PM
  */
 
-@RunWith(classOf[JUnitRunner])
 class ImplicitBindingTest extends FunSuite with Matchers with SeveredStackTraces {
   test("Implicit binding 1") {
     implicit val bm = newBindingModule { implicit module =>

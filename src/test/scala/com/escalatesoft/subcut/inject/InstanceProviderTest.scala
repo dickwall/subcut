@@ -2,10 +2,7 @@ package com.escalatesoft.subcut.inject
 
 import org.scalatest.Matchers
 import org.scalatest.{FunSuite, SeveredStackTraces}
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
 
-@RunWith(classOf[JUnitRunner])
 class InstanceProviderTest extends FunSuite with Matchers {
 
   test("NewInstanceProvider should provide a new instance each time instance property is accessed") {  

@@ -2,8 +2,6 @@ package com.escalatesoft.subcut.inject
 
 import org.scalatest.Matchers
 import org.scalatest.{FunSuite, SeveredStackTraces}
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
 import io.Source
 
 /**
@@ -13,7 +11,6 @@ import io.Source
  * Time: 4:46 PM
  */
 
-@RunWith(classOf[JUnitRunner])
 class ModuleCompositionAndMergingTest extends FunSuite with Matchers with SeveredStackTraces {
 
   test("Modules should be composable the :: operator") {

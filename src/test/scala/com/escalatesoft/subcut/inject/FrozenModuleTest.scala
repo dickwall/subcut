@@ -2,8 +2,6 @@ package com.escalatesoft.subcut.inject
 
 import org.scalatest.Matchers
 import org.scalatest.{FunSuite, SeveredStackTraces}
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 
 /*
  * Created by IntelliJ IDEA.
@@ -12,7 +10,6 @@ import org.scalatest.junit.JUnitRunner
  * Time: 2:50 PM
  */
 
-@RunWith(classOf[JUnitRunner])
 class FrozenModuleTest extends FunSuite with Matchers with SeveredStackTraces {
   test("No binding in the module") {
     intercept[BindingException] {

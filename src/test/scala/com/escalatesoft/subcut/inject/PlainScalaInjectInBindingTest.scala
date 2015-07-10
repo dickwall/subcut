@@ -1,10 +1,7 @@
 package com.escalatesoft.subcut.inject
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.Matchers
 import org.scalatest.FunSuite
 
-@RunWith(classOf[JUnitRunner])
 class PlainScalaInjectInBindingTest extends FunSuite with Matchers {
 
   test("inject method is used as service locator for plain Scala constructor style dependency injection during binding") {

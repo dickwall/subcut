@@ -2,8 +2,6 @@ package com.escalatesoft.subcut.inject
 
 import org.scalatest.Matchers
 import org.scalatest.{SeveredStackTraces, FunSuite}
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import java.beans.BeanInfo
 
 /**
@@ -13,7 +11,6 @@ import java.beans.BeanInfo
  * Time: 6:38 AM
  */
 
-@RunWith(classOf[JUnitRunner])
 class ConstructorInjectionTest extends FunSuite with Matchers with SeveredStackTraces {
   test("Use defined binding, supply no constructor parameter") {
     implicit val bindings = AnimalModule

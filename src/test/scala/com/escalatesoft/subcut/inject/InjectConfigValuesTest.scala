@@ -2,8 +2,6 @@ package com.escalatesoft.subcut.inject
 
 import org.scalatest.Matchers
 import org.scalatest.{FunSuite, SeveredStackTraces}
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
 
 /**
  * Created by IntelliJ IDEA.
@@ -12,7 +10,6 @@ import org.junit.runner.RunWith
  * Time: 10:32 AM
  */
 
-@RunWith(classOf[JUnitRunner])
 class InjectConfigValuesTest extends FunSuite with Matchers with SeveredStackTraces {
   test("inject some default configuration values using all bound") {
     implicit val bindings = ConfigValueModule

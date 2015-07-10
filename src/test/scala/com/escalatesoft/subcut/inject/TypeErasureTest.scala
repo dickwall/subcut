@@ -2,11 +2,8 @@ package com.escalatesoft.subcut.inject
 
 import org.scalatest.{SeveredStackTraces, FunSuite}
 import org.scalatest.Matchers
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import scala.language.reflectiveCalls
 
-@RunWith(classOf[JUnitRunner])
 class TypeErasureTest extends FunSuite with Matchers with SeveredStackTraces {
   test("Can inject types regardless of erasure in binding keys") {
     val actual = new Injectable {

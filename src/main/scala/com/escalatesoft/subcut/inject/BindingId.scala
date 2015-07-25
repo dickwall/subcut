@@ -10,11 +10,12 @@ package com.escalatesoft.subcut.inject
  *
  * E.g.
  *
- * <pre>
+ * {{{
  *   object MainDB extends BindingId
  *   ...
  *
  *   bind [Db] idBy BindingId toSingle new SqlDB
+ * }}}
  */
 abstract class BindingId {
   lazy val bindingName = {

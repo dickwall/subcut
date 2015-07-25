@@ -145,8 +145,8 @@ trait BindingModule { outer =>
  * class upon exit of the bindings evaluation.
  * <p/>
  * To use this class:
- * <p/>
- * <pre>
+ * 
+ * {{{
  * class ProductionBindings extends NewBindingModule(module => {
  *    import module._   // for convenience
  *    bind [DBLookup] to moduleInstanceOf [MySQLLookup]
@@ -154,7 +154,7 @@ trait BindingModule { outer =>
  *    bind [Int] identifiedBy 'maxPoolSize toSingle 10   // could also use idBy instead of identifiedBy
  *    bind [QueryService] toProvider { implicit module => new SlowInitQueryService }
  * })
- * </pre>
+ * }}}
  * @param fn a function that takes a mutable binding module and initializes it with whatever bindings
  * you want. The module will be frozen after creation of the bindings, but is mutable for the
  * time you are defining it with the DSL.
@@ -173,7 +173,7 @@ class NewBindingModule(fn: MutableBindingModule => Unit) extends BindingModule w
  * a function from MutableBindingModule to unit.
  * <p/>
  * to use this class:
- * <pre>
+ * {{{
  * import NewBindingModule._
  * implicit val bindingModule = newBindingModule { module =>
  *    import module._
@@ -182,7 +182,7 @@ class NewBindingModule(fn: MutableBindingModule => Unit) extends BindingModule w
  *    bind [Int] identifiedBy 'maxPoolSize toSingle 10   // could also use idBy instead of identifiedBy
  *    bind [QueryService] toSingle { new SlowInitQueryService }
  * }
- * </pre>
+ * }}}
  */
 object NewBindingModule {
   def newBindingModule(fn: MutableBindingModule => Unit): BindingModule = new NewBindingModule(fn)
@@ -202,7 +202,7 @@ object NewBindingModule {
  * thread safe, as each test gets a new copy of the binding module and will not interfere with others.
  * <p/>
  * An example usage will look like this:
- * <pre>
+ * {{{
  * class SomeBindings extends NewBindingModule (module => {
  *   import module._
  *   bind [Trait1] toSingle new Class1Impl
@@ -213,7 +213,7 @@ object NewBindingModule {
  *   testBindings.bind[Trait1] toSingle mockClass1Impl  // where the mock has been set up already
  *   // run tests using the mockClass1Impl
  * }  // coming out of scope destroys the temporary mutable binding module
- * </pre>
+ * }}}
  */
 trait MutableBindingModule extends BindingModule { outer =>
 
@@ -285,13 +285,13 @@ trait MutableBindingModule extends BindingModule { outer =>
   /**
    * Convenience form of merge with replace, can be used like this:
    *
-   * <pre>
+   * {{{
    * class SomeBindings extends NewBindingModule ({ module =>
    *   module <~ OtherModule1   // include all bindings from Module1
    *   module <~ OtherModule2   // include all bindings from Module2, overwriting as necessary
    *   module.bind[Trait1] toSingle new Class1Impl
    * })
-   * </pre>
+   * }}}
    */
   def <~(other: BindingModule) { mergeWithReplace(other) }
 
@@ -510,9 +510,9 @@ trait MutableBindingModule extends BindingModule { outer =>
      * modules will, of course, be unaffected.
      * <p/>
      * Example usage:
-     * <pre>
+     * {{{
      *   module.bind [Database] idBy 'addressDb toModuleSingle { implicit module => new MySQLAddressDB }
-     * </pre>
+     * }}}
      * @param function A function that must take a binding module, and returns a new instance using that module
      *                 to provide configuration information. If you mark the module implicit in the parameter
      *                 declaration, new instances of injected classes created in the function will automatically
@@ -584,7 +584,9 @@ trait MutableBindingModule extends BindingModule { outer =>
      * interchangeable, i.e. 'maxPoolSize and "maxPoolSize" are equivalent both in definition and in usage.
      * <p/>
      * Typical usage:
-     * <code>module.bind [Int] identifiedBy "maxPoolSize" toSingle 30</code>
+     * {{{
+     * module.bind [Int] identifiedBy "maxPoolSize" toSingle 30
+     * }}}
      * @param n the string name to identify this binding when used in combination with the type parameter.
      */
     def identifiedBy(n: String) = {
@@ -599,7 +601,9 @@ trait MutableBindingModule extends BindingModule { outer =>
      * interchangeable, i.e. 'maxPoolSize and "maxPoolSize" are equivalent both in definition and in usage.
      * <p/>
      * Typical usage:
-     * <code>module.bind [Int] identifiedBy 'maxPoolSize toSingle 30</code>
+     * {{{
+     * module.bind [Int] identifiedBy 'maxPoolSize toSingle 30
+     * }}}
      * @param symbol the symbol name to identify this binding when used in combination with the type parameter.
      */
     def identifiedBy(symbol: Symbol) = {

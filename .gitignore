@@ -9,7 +9,7 @@ project/plugins/src_managed
 .idea
 .ensime
 .ensime_port
-project
+project/target
 
 # Eclipse
 .classpath

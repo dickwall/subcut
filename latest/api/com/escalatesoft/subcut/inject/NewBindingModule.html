@@ -55,15 +55,13 @@
 takes a function to evaluate, and passes this on to a bindings method which can be used to resolve
 the bindingModule using the function on demand. The binding module loaned to the passed in function
 is mutable, allowing the convenient DSL to be used, then the bindings are copied to an immutable
-class upon exit of the bindings evaluation.</p><p>To use this class:</p><p><pre>
-class ProductionBindings extends NewBindingModule(module => {
-   import module._   // for convenience
+class upon exit of the bindings evaluation.</p><p>To use this class:</p><pre><span class="kw">class</span> ProductionBindings <span class="kw">extends</span> NewBindingModule(module <span class="kw">=&gt;</span> {
+   <span class="kw">import</span> module._   <span class="cmt">// for convenience</span>
    bind [DBLookup] to moduleInstanceOf [MySQLLookup]
    bind [WebService] to newInstanceOf [RealWebService]
-   bind [Int] identifiedBy 'maxPoolSize toSingle 10   // could also use idBy instead of identifiedBy
-   bind [QueryService] toProvider { implicit module => new SlowInitQueryService }
-})
-</pre></p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+   bind [<span class="std">Int</span>] identifiedBy 'maxPoolSize toSingle <span class="num">10</span>   <span class="cmt">// could also use idBy instead of identifiedBy</span>
+   bind [QueryService] toProvider { <span class="kw">implicit</span> module <span class="kw">=&gt;</span> <span class="kw">new</span> SlowInitQueryService }
+})</pre></div><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@SerialVersionUID</span><span class="args">()</span>
               
         </dd></dl><div class="toggleContainer block">

@@ -52,18 +52,14 @@
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A companion object holding a convenience method to create new binding modules on the fly when passed
-a function from MutableBindingModule to unit.</p><p>to use this class:
-<pre>
-import NewBindingModule._
-implicit val bindingModule = newBindingModule { module =>
-   import module._
-   bind [DBLookup] toProvider { module => new MySQLLookup(module) } // could use implicit module => instead
+a function from MutableBindingModule to unit.</p><p>to use this class:</p><pre><span class="kw">import</span> NewBindingModule._
+<span class="kw">implicit</span> <span class="kw">val</span> bindingModule = newBindingModule { module <span class="kw">=&gt;</span>
+   <span class="kw">import</span> module._
+   bind [DBLookup] toProvider { module <span class="kw">=&gt;</span> <span class="kw">new</span> MySQLLookup(module) } <span class="cmt">// could use implicit module => instead</span>
    bind [WebService] to newInstanceOf [RealWebService]
-   bind [Int] identifiedBy 'maxPoolSize toSingle 10   // could also use idBy instead of identifiedBy
-   bind [QueryService] toSingle { new SlowInitQueryService }
-}
-</pre>
-</p></div><div class="toggleContainer block">
+   bind [<span class="std">Int</span>] identifiedBy 'maxPoolSize toSingle <span class="num">10</span>   <span class="cmt">// could also use idBy instead of identifiedBy</span>
+   bind [QueryService] toSingle { <span class="kw">new</span> SlowInitQueryService }
+}</pre></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>

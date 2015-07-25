@@ -174,12 +174,10 @@ User: dick
 Date: 1/1/13
 Time: 2:05 PM
 An abstract superclass for BindingId definitions as objects - used for easy, typesafe and code completion
-compatible binding names.</p><p>E.g.</p><p><pre>
-  object MainDB extends BindingId
-  ...
+compatible binding names.</p><p>E.g.</p><pre><span class="kw">object</span> MainDB <span class="kw">extends</span> BindingId
+...
 
-  bind [Db] idBy BindingId toSingle new SqlDB
-</p></div></div>
+bind [Db] idBy BindingId toSingle <span class="kw">new</span> SqlDB</pre></div></div>
     </li><li name="com.escalatesoft.subcut.inject.BindingModule" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="BindingModuleextendsAnyRef"></a>
       <a id="BindingModule:BindingModule"></a>
@@ -293,20 +291,16 @@ reconfigure the same binding and cause a race condition which will cause the tes
 As such, direct usage of the mutable binding module, particularly in a production environment, is
 strongly discouraged. Use NewBindingModule instead to ensure immutability and thread safety.</p><p>The MutableBindingModule is also provided on a per-function usage by the modifyBindings method on
 BindingModule. This is the recommended way to have rebindings on a test-by-test basis and is
-thread safe, as each test gets a new copy of the binding module and will not interfere with others.</p><p>An example usage will look like this:
-<pre>
-class SomeBindings extends NewBindingModule (module => {
-  import module._
-  bind [Trait1] toSingle new Class1Impl
+thread safe, as each test gets a new copy of the binding module and will not interfere with others.</p><p>An example usage will look like this:</p><pre><span class="kw">class</span> SomeBindings <span class="kw">extends</span> NewBindingModule (module <span class="kw">=&gt;</span> {
+  <span class="kw">import</span> module._
+  bind [Trait1] toSingle <span class="kw">new</span> Class1Impl
 })
 
-// in a test...
-SomeBindings.modifyBindings { testBindings =>  // holds mutable copy of SomeBindings
-  testBindings.bind[Trait1] toSingle mockClass1Impl  // where the mock has been set up already
-  // run tests using the mockClass1Impl
-}  // coming out of scope destroys the temporary mutable binding module
-</pre>
-</p></div></div>
+<span class="cmt">// in a test...</span>
+SomeBindings.modifyBindings { testBindings <span class="kw">=&gt;</span>  <span class="cmt">// holds mutable copy of SomeBindings</span>
+  testBindings.bind[Trait1] toSingle mockClass1Impl  <span class="cmt">// where the mock has been set up already</span>
+  <span class="cmt">// run tests using the mockClass1Impl</span>
+}  <span class="cmt">// coming out of scope destroys the temporary mutable binding module</span></pre></div></div>
     </li><li name="com.escalatesoft.subcut.inject.NewBindingModule" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="NewBindingModuleextendsBindingModulewithSerializable"></a>
       <a id="NewBindingModule:NewBindingModule"></a>
@@ -327,15 +321,13 @@ SomeBindings.modifyBindings { testBindings =>  // holds mutable copy of SomeBind
 takes a function to evaluate, and passes this on to a bindings method which can be used to resolve
 the bindingModule using the function on demand. The binding module loaned to the passed in function
 is mutable, allowing the convenient DSL to be used, then the bindings are copied to an immutable
-class upon exit of the bindings evaluation.</p><p>To use this class:</p><p><pre>
-class ProductionBindings extends NewBindingModule(module => {
-   import module._   // for convenience
+class upon exit of the bindings evaluation.</p><p>To use this class:</p><pre><span class="kw">class</span> ProductionBindings <span class="kw">extends</span> NewBindingModule(module <span class="kw">=&gt;</span> {
+   <span class="kw">import</span> module._   <span class="cmt">// for convenience</span>
    bind [DBLookup] to moduleInstanceOf [MySQLLookup]
    bind [WebService] to newInstanceOf [RealWebService]
-   bind [Int] identifiedBy 'maxPoolSize toSingle 10   // could also use idBy instead of identifiedBy
-   bind [QueryService] toProvider { implicit module => new SlowInitQueryService }
-})
-</pre></p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+   bind [<span class="std">Int</span>] identifiedBy 'maxPoolSize toSingle <span class="num">10</span>   <span class="cmt">// could also use idBy instead of identifiedBy</span>
+   bind [QueryService] toProvider { <span class="kw">implicit</span> module <span class="kw">=&gt;</span> <span class="kw">new</span> SlowInitQueryService }
+})</pre></div><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@SerialVersionUID</span><span class="args">()</span>
               
         </dd></dl></div>
@@ -364,18 +356,14 @@ class ProductionBindings extends NewBindingModule(module => {
     </span>
       <p class="shortcomment cmt">A companion object holding a convenience method to create new binding modules on the fly when passed
 a function from MutableBindingModule to unit.</p><div class="fullcomment"><div class="comment cmt"><p>A companion object holding a convenience method to create new binding modules on the fly when passed
-a function from MutableBindingModule to unit.</p><p>to use this class:
-<pre>
-import NewBindingModule._
-implicit val bindingModule = newBindingModule { module =>
-   import module._
-   bind [DBLookup] toProvider { module => new MySQLLookup(module) } // could use implicit module => instead
+a function from MutableBindingModule to unit.</p><p>to use this class:</p><pre><span class="kw">import</span> NewBindingModule._
+<span class="kw">implicit</span> <span class="kw">val</span> bindingModule = newBindingModule { module <span class="kw">=&gt;</span>
+   <span class="kw">import</span> module._
+   bind [DBLookup] toProvider { module <span class="kw">=&gt;</span> <span class="kw">new</span> MySQLLookup(module) } <span class="cmt">// could use implicit module => instead</span>
    bind [WebService] to newInstanceOf [RealWebService]
-   bind [Int] identifiedBy 'maxPoolSize toSingle 10   // could also use idBy instead of identifiedBy
-   bind [QueryService] toSingle { new SlowInitQueryService }
-}
-</pre>
-</p></div></div>
+   bind [<span class="std">Int</span>] identifiedBy 'maxPoolSize toSingle <span class="num">10</span>   <span class="cmt">// could also use idBy instead of identifiedBy</span>
+   bind [QueryService] toSingle { <span class="kw">new</span> SlowInitQueryService }
+}</pre></div></div>
     </li><li name="com.escalatesoft.subcut.inject#bindingIdToString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="bindingIdToString(bindingId:com.escalatesoft.subcut.inject.BindingId):String"></a>
       <a id="bindingIdToString(BindingId):String"></a>

@@ -351,8 +351,7 @@
 in combination with the trait type being bound, a unique key is formed.</p><div class="fullcomment"><div class="comment cmt"><p>Part of the fluent interface in the DSL, identified by provides a name to attach to the binding key so that,
 in combination with the trait type being bound, a unique key is formed. This form takes a symbol name, but
 there is an overloaded version that allows a string to be used instead. The symbol and string names are
-interchangeable, i.e. 'maxPoolSize and &quot;maxPoolSize&quot; are equivalent both in definition and in usage.</p><p>Typical usage:
-<code>module.bind [Int] identifiedBy 'maxPoolSize toSingle 30</code></p></div><dl class="paramcmts block"><dt class="param">symbol</dt><dd class="cmt"><p>the symbol name to identify this binding when used in combination with the type parameter.</p></dd></dl></div>
+interchangeable, i.e. 'maxPoolSize and &quot;maxPoolSize&quot; are equivalent both in definition and in usage.</p><p>Typical usage:</p><pre>module.bind [<span class="std">Int</span>] identifiedBy 'maxPoolSize toSingle <span class="num">30</span></pre></div><dl class="paramcmts block"><dt class="param">symbol</dt><dd class="cmt"><p>the symbol name to identify this binding when used in combination with the type parameter.</p></dd></dl></div>
     </li><li name="com.escalatesoft.subcut.inject.MutableBindingModule.Bind#identifiedBy" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="identifiedBy(n:String):MutableBindingModule.this.Bind[T]"></a>
       <a id="identifiedBy(String):Bind[T]"></a>
@@ -373,8 +372,7 @@ interchangeable, i.e. 'maxPoolSize and &quot;maxPoolSize&quot; are equivalent bo
 in combination with the trait type being bound, a unique key is formed.</p><div class="fullcomment"><div class="comment cmt"><p>Part of the fluent interface in the DSL, identified by provides a name to attach to the binding key so that,
 in combination with the trait type being bound, a unique key is formed. This form takes a string name, but
 there is an overloaded version that allows a symbol to be used instead. The symbol and string names are
-interchangeable, i.e. 'maxPoolSize and &quot;maxPoolSize&quot; are equivalent both in definition and in usage.</p><p>Typical usage:
-<code>module.bind [Int] identifiedBy "maxPoolSize" toSingle 30</code></p></div><dl class="paramcmts block"><dt class="param">n</dt><dd class="cmt"><p>the string name to identify this binding when used in combination with the type parameter.</p></dd></dl></div>
+interchangeable, i.e. 'maxPoolSize and &quot;maxPoolSize&quot; are equivalent both in definition and in usage.</p><p>Typical usage:</p><pre>module.bind [<span class="std">Int</span>] identifiedBy <span class="lit">"maxPoolSize"</span> toSingle <span class="num">30</span></pre></div><dl class="paramcmts block"><dt class="param">n</dt><dd class="cmt"><p>the string name to identify this binding when used in combination with the type parameter.</p></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -543,10 +541,7 @@ employed, but it does not require a brand new instance to be returned for every 
 method or with the reflection instance injection. The function provided must consume a module, which the
 injector will provide from the current module configuration. When new modules are created, the singletons in
 that new module will be reset and will then be created anew when first used. Existing singletons in other
-modules will, of course, be unaffected.</p><p>Example usage:
-<pre>
-  module.bind [Database] idBy 'addressDb toModuleSingle { implicit module => new MySQLAddressDB }
-</pre></p></div><dl class="paramcmts block"><dt class="tparam">I</dt><dd class="cmt"><p>The instance type I that will be created by the function - must be a subtype of T</p></dd><dt class="param">function</dt><dd class="cmt"><p>A function that must take a binding module, and returns a new instance using that module
+modules will, of course, be unaffected.</p><p>Example usage:</p><pre>module.bind [Database] idBy 'addressDb toModuleSingle { <span class="kw">implicit</span> module <span class="kw">=&gt;</span> <span class="kw">new</span> MySQLAddressDB }</pre></div><dl class="paramcmts block"><dt class="tparam">I</dt><dd class="cmt"><p>The instance type I that will be created by the function - must be a subtype of T</p></dd><dt class="param">function</dt><dd class="cmt"><p>A function that must take a binding module, and returns a new instance using that module
                 to provide configuration information. If you mark the module implicit in the parameter
                 declaration, new instances of injected classes created in the function will automatically
                 get the latest configuration.</p></dd></dl></div>

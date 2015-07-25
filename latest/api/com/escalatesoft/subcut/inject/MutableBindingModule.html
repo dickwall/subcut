@@ -57,20 +57,16 @@ reconfigure the same binding and cause a race condition which will cause the tes
 As such, direct usage of the mutable binding module, particularly in a production environment, is
 strongly discouraged. Use NewBindingModule instead to ensure immutability and thread safety.</p><p>The MutableBindingModule is also provided on a per-function usage by the modifyBindings method on
 BindingModule. This is the recommended way to have rebindings on a test-by-test basis and is
-thread safe, as each test gets a new copy of the binding module and will not interfere with others.</p><p>An example usage will look like this:
-<pre>
-class SomeBindings extends NewBindingModule (module => {
-  import module._
-  bind [Trait1] toSingle new Class1Impl
+thread safe, as each test gets a new copy of the binding module and will not interfere with others.</p><p>An example usage will look like this:</p><pre><span class="kw">class</span> SomeBindings <span class="kw">extends</span> NewBindingModule (module <span class="kw">=&gt;</span> {
+  <span class="kw">import</span> module._
+  bind [Trait1] toSingle <span class="kw">new</span> Class1Impl
 })
 
-// in a test...
-SomeBindings.modifyBindings { testBindings =>  // holds mutable copy of SomeBindings
-  testBindings.bind[Trait1] toSingle mockClass1Impl  // where the mock has been set up already
-  // run tests using the mockClass1Impl
-}  // coming out of scope destroys the temporary mutable binding module
-</pre>
-</p></div><dl class="attributes block"> <dt>Self Type</dt><dd><a href="" class="extype" name="com.escalatesoft.subcut.inject.MutableBindingModule">MutableBindingModule</a></dd></dl><div class="toggleContainer block">
+<span class="cmt">// in a test...</span>
+SomeBindings.modifyBindings { testBindings <span class="kw">=&gt;</span>  <span class="cmt">// holds mutable copy of SomeBindings</span>
+  testBindings.bind[Trait1] toSingle mockClass1Impl  <span class="cmt">// where the mock has been set up already</span>
+  <span class="cmt">// run tests using the mockClass1Impl</span>
+}  <span class="cmt">// coming out of scope destroys the temporary mutable binding module</span></pre></div><dl class="attributes block"> <dt>Self Type</dt><dd><a href="" class="extype" name="com.escalatesoft.subcut.inject.MutableBindingModule">MutableBindingModule</a></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="BindingModule.html" class="extype" name="com.escalatesoft.subcut.inject.BindingModule">BindingModule</a>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
@@ -185,14 +181,11 @@ SomeBindings.modifyBindings { testBindings =>  // holds mutable copy of SomeBind
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Convenience form of merge with replace, can be used like this:</p><div class="fullcomment"><div class="comment cmt"><p>Convenience form of merge with replace, can be used like this:</p><p><pre>
-class SomeBindings extends NewBindingModule ({ module =>
-  module <~ OtherModule1   // include all bindings from Module1
-  module <~ OtherModule2   // include all bindings from Module2, overwriting as necessary
-  module.bind[Trait1] toSingle new Class1Impl
-})
-</pre>
-</p></div></div>
+      <p class="shortcomment cmt">Convenience form of merge with replace, can be used like this:</p><div class="fullcomment"><div class="comment cmt"><p>Convenience form of merge with replace, can be used like this:</p><pre><span class="kw">class</span> SomeBindings <span class="kw">extends</span> NewBindingModule ({ module <span class="kw">=&gt;</span>
+  module &lt;~ OtherModule1   <span class="cmt">// include all bindings from Module1</span>
+  module &lt;~ OtherModule2   <span class="cmt">// include all bindings from Module2, overwriting as necessary</span>
+  module.bind[Trait1] toSingle <span class="kw">new</span> Class1Impl
+})</pre></div></div>
     </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a>
       <a id="==(Any):Boolean"></a>

@@ -1,15 +1,7 @@
 package com.escalatesoft.subcut.inject
 
-import org.scalatest.Matchers
-import org.scalatest.{SeveredStackTraces, FunSuite}
 import NewBindingModule._
-
-/**
- * Created by IntelliJ IDEA.
- * User: Dick Wall
- * Date: 4/24/11
- * Time: 6:28 PM
- */
+import org.scalatest.{FunSuite, Matchers, SeveredStackTraces}
 
 class ImplicitBindingTest extends FunSuite with Matchers with SeveredStackTraces {
   test("Implicit binding 1") {

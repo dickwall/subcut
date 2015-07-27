@@ -1,15 +1,6 @@
 package com.escalatesoft.subcut.inject
 
-import org.scalatest.Matchers
-import org.scalatest.{SeveredStackTraces, FunSuite}
-import java.beans.BeanInfo
-
-/**
- * Created by IntelliJ IDEA.
- * User: Dick Wall
- * Date: 4/29/11
- * Time: 6:38 AM
- */
+import org.scalatest.{FunSuite, Matchers, SeveredStackTraces}
 
 class ConstructorInjectionTest extends FunSuite with Matchers with SeveredStackTraces {
   test("Use defined binding, supply no constructor parameter") {

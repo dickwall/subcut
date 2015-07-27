@@ -1,7 +1,6 @@
 package com.escalatesoft.subcut.inject
 
-import org.scalatest.{SeveredStackTraces, FunSuite}
-import org.scalatest.Matchers
+import org.scalatest.{FunSuite, Matchers, SeveredStackTraces}
 import scala.language.reflectiveCalls
 
 class TypeErasureTest extends FunSuite with Matchers with SeveredStackTraces {

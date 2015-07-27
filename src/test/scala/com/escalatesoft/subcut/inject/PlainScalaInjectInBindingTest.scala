@@ -1,6 +1,6 @@
 package com.escalatesoft.subcut.inject
-import org.scalatest.Matchers
-import org.scalatest.FunSuite
+
+import org.scalatest.{FunSuite, Matchers}
 
 class PlainScalaInjectInBindingTest extends FunSuite with Matchers {
 

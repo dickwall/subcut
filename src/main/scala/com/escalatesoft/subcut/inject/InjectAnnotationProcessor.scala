@@ -1,17 +1,13 @@
 package com.escalatesoft.subcut.inject
 
-import tools.nsc.plugins.{Plugin, PluginComponent}
-import tools.nsc.Global
-import tools.nsc.transform.{TypingTransformers, InfoTransform, Transform}
-import com.sun.xml.internal.ws.developer.MemberSubmissionAddressing.Validation
-import tools.nsc.symtab.Flags
+import scala.tools.nsc.Global
+import scala.tools.nsc.plugins.{Plugin, PluginComponent}
+import scala.tools.nsc.symtab.Flags
+import scala.tools.nsc.transform.{InfoTransform, Transform, TypingTransformers}
 
 /**
- * Created by IntelliJ IDEA.
- * User: dick
- * Date: 7/25/11
- * Time: 3:16 PM
- * To change this template use File | Settings | File Templates.
+ * A compiler plugin to automatically add the implicit binding module to any class
+ * that extends the trait AutoInjectable
  */
 
 class AnnotationsInjectPlugin(val global: Global) extends Plugin {

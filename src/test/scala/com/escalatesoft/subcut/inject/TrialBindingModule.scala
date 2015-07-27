@@ -1,14 +1,7 @@
 package com.escalatesoft.subcut.inject
 
-import org.scalatest.{SeveredStackTraces, FunSuite}
-import org.scalatest.Matchers
+import org.scalatest.{FunSuite, Matchers, SeveredStackTraces}
 
-/*
- * Created by IntelliJ IDEA.
- * User: Dick Wall
- * Date: 2/17/11
- * Time: 11:41 AM
- */
 class InjectionTest extends FunSuite with Matchers with SeveredStackTraces {
 
   test("Create an object with injected resources") {

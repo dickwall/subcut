@@ -2,13 +2,6 @@ package com.escalatesoft.subcut
 
 import scala.language.implicitConversions
 
-/**
- * Created by IntelliJ IDEA.
- * User: Dick Wall
- * Date: 5/5/11
- * Time: 10:06 AM
- */
-
 package object inject {
   /**
    * Package definition to provide an injected value that indicates the default value for a constructor parameter

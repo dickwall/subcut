@@ -1,14 +1,6 @@
 package com.escalatesoft.subcut.inject
 
-import org.scalatest.Matchers
-import org.scalatest.{FunSuite, SeveredStackTraces}
-
-/*
- * Created by IntelliJ IDEA.
- * User: Dick Wall
- * Date: 3/27/11
- * Time: 2:50 PM
- */
+import org.scalatest.{FunSuite, Matchers, SeveredStackTraces}
 
 class FrozenModuleTest extends FunSuite with Matchers with SeveredStackTraces {
   test("No binding in the module") {

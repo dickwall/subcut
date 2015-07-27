@@ -1,15 +1,6 @@
 package com.escalatesoft.subcut.inject
 
-import org.scalatest.Matchers
-import org.scalatest.FunSuite
-
-/**
- * Created with IntelliJ IDEA.
- * User: rlwall2
- * Date: 6/12/12
- * Time: 12:52 PM
- * To change this template use File | Settings | File Templates.
- */
+import org.scalatest.{FunSuite, Matchers}
 
 class ModuleSpecificInstanceTest extends FunSuite with Matchers {
   test ("module specific reflective instances") {

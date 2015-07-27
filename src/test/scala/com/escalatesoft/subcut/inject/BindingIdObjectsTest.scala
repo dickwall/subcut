@@ -1,15 +1,9 @@
 package com.escalatesoft.subcut.inject
 
 import NewBindingModule.newBindingModule
-import org.scalatest.Matchers
-import org.scalatest.FunSuite
-
+import org.scalatest.{FunSuite, Matchers}
 
 /**
- * Created with IntelliJ IDEA.
- * User: dick
- * Date: 1/1/13
- * Time: 2:11 PM
  * Test the interplay between BindingId objects, symbols and Strings to make sure they all interoperate as expected
  */
 class BindingIdObjectsTest extends FunSuite with Matchers {

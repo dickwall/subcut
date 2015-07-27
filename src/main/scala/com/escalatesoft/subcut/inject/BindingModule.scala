@@ -1,11 +1,5 @@
 package com.escalatesoft.subcut.inject
 
-/*
- * Created by IntelliJ IDEA.
- * User: dick
- * Date: 2/17/11
- * Time: 11:39 AM
- */
 import scala.collection._
 
 /**

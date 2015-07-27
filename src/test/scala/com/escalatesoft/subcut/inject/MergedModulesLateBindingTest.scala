@@ -1,15 +1,6 @@
 package com.escalatesoft.subcut.inject
 
-import org.scalatest.FunSuite
-import org.scalatest.Matchers
-
-/**
- * Created with IntelliJ IDEA.
- * User: rlwall2
- * Date: 6/11/12
- * Time: 9:06 PM
- * To change this template use File | Settings | File Templates.
- */
+import org.scalatest.{FunSuite, Matchers}
 
 class MergedModulesLateBindingTest extends FunSuite with Matchers {
 

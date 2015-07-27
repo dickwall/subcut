@@ -1,9 +1,9 @@
 package com.escalatesoft.subcut.inject.util
 
-import org.scalatest.{SeveredStackTraces, Matchers, FunSuite}
-import java.io.File
 import com.escalatesoft.subcut.inject._
-import NewBindingModule._
+import com.escalatesoft.subcut.inject.NewBindingModule._
+import java.io.File
+import org.scalatest.{FunSuite, Matchers, SeveredStackTraces}
 import scala.concurrent.duration.Duration
 
 /**

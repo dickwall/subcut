@@ -1,15 +1,6 @@
 package com.escalatesoft.subcut.inject
 
-import org.scalatest.Matchers
-import org.scalatest.{FunSuite, SeveredStackTraces}
-import io.Source
-
-/**
- * Created by IntelliJ IDEA.
- * User: Dick Wall
- * Date: 5/1/11
- * Time: 4:46 PM
- */
+import org.scalatest.{FunSuite, Matchers, SeveredStackTraces}
 
 class ModuleCompositionAndMergingTest extends FunSuite with Matchers with SeveredStackTraces {
 

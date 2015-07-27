@@ -1,7 +1,6 @@
 package com.escalatesoft.subcut.inject
 
-import org.scalatest.Matchers
-import org.scalatest.{FunSuite, SeveredStackTraces}
+import org.scalatest.{FunSuite, Matchers, SeveredStackTraces}
 
 class InstanceProviderTest extends FunSuite with Matchers {
 

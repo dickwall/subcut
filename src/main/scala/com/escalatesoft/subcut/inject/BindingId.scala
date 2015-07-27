@@ -1,10 +1,6 @@
 package com.escalatesoft.subcut.inject
 
 /**
- * Created with IntelliJ IDEA.
- * User: dick
- * Date: 1/1/13
- * Time: 2:05 PM
  * An abstract superclass for BindingId definitions as objects - used for easy, typesafe and code completion
  * compatible binding names.
  *

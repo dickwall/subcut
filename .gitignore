@@ -9,6 +9,8 @@ project/plugins/src_managed
 .idea
 .ensime
 .ensime_port
+.ensime_cache
+.ensime_session
 project/target
 
 # Eclipse

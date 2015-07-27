@@ -1,15 +1,5 @@
 package com.escalatesoft.subcut.inject
 
-/**
- * Created by IntelliJ IDEA.
- * User: dick
- * Date: 4/29/11
- * Time: 6:29 AM
- * To change this template use File | Settings | File Templates.
- */
-
-import scala.collection._
-
 private[inject] class ClassInstanceProvider[I <: Any](val clazz: Class[Any]) {
   def newInstance[I](module: BindingModule)(implicit m: scala.reflect.Manifest[I]): I = {
     try {

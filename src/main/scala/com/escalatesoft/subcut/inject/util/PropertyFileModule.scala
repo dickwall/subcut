@@ -1,12 +1,12 @@
 package com.escalatesoft.subcut.inject.util
 
-import com.escalatesoft.subcut.inject.{BindingException, NewBindingModule, BindingModule, BindingKey}
-import NewBindingModule.newBindingModule
-import java.io.{FileInputStream, File}
+import com.escalatesoft.subcut.inject.{BindingException, BindingKey, BindingModule, NewBindingModule}
+import com.escalatesoft.subcut.inject.NewBindingModule.newBindingModule
+import java.io.{File, FileInputStream}
 import java.util.Properties
 import scala.collection.JavaConverters._
-import scala.language.existentials
 import scala.concurrent.duration._
+import scala.language.existentials
 
 /**
  * Read simple value bindings from a property file for simple file-based configurations

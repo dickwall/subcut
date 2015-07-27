@@ -1,14 +1,6 @@
 package com.escalatesoft.subcut.inject
 
-import org.scalatest.Matchers
-import org.scalatest.{FunSuite, SeveredStackTraces}
-
-/**
- * Created by IntelliJ IDEA.
- * User: Dick Wall
- * Date: 5/1/11
- * Time: 10:32 AM
- */
+import org.scalatest.{FunSuite, Matchers, SeveredStackTraces}
 
 class InjectConfigValuesTest extends FunSuite with Matchers with SeveredStackTraces {
   test("inject some default configuration values using all bound") {

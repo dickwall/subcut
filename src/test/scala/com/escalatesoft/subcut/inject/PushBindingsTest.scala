@@ -1,14 +1,6 @@
 package com.escalatesoft.subcut.inject
 
-import org.scalatest.Matchers
-import org.scalatest.{FunSuite, SeveredStackTraces}
-
-/*
- * Created by IntelliJ IDEA.
- * User: Dick Wall
- * Date: 3/27/11
- * Time: 4:01 PM
- */
+import org.scalatest.{FunSuite, Matchers, SeveredStackTraces}
 
 class SomeTestClass extends Injectable with PushBindingsTestInjections {
   def tryThemAll(s: String, i: Int, d: Double): (String, Int, Double, Int) = {

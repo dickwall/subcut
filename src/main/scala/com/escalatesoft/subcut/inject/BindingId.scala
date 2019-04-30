@@ -20,3 +20,11 @@ abstract class BindingId {
     if (shortName.last == '$') shortName.init else shortName
   }
 }
+
+abstract class TypedBindingId[T] {
+  lazy val bindingName = {
+    val shortName = this.getClass.getSimpleName
+    // strip the trailing $ for objects
+    if (shortName.last == '$') shortName.init else shortName
+  }
+}
